@@ -27,7 +27,7 @@ void afficherTableau(const vector<vector<Case>>& tableau) {
     int largeurColonne = to_string(tableau[0].size() - 1).length();
 
     // Afficher les numéros de colonnes
-    cout << "    ";
+    cout << setw(largeurLigne + 2) << " "; // Ajustement pour les numéros de ligne
     for (int i = 0; i < tableau[0].size(); ++i) {
         cout << setw(largeurColonne + 1) << i;
     }
@@ -35,7 +35,7 @@ void afficherTableau(const vector<vector<Case>>& tableau) {
 
     // Afficher le tableau avec les numéros de lignes
     for (int i = 0; i < tableau.size(); ++i) {
-        cout << setw(largeurLigne) << i << ' ';
+        cout << setw(largeurLigne + 1) << i << " "; // Ajustement pour les numéros de ligne
 
         for (int j = 0; j < tableau[i].size(); ++j) {
             char caractere = (tableau[i][j].caractere == 0) ? '.' : tableau[i][j].caractere;
@@ -44,6 +44,8 @@ void afficherTableau(const vector<vector<Case>>& tableau) {
         cout << endl;
     }
 }
+
+
 
 int main() {
     // Demander le nombre de joueurs
@@ -110,7 +112,7 @@ int main() {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         // Demander à l'utilisateur les coordonnées où écrire
-        cout << "Entrez les coordonnées (ligne colonne) : ";
+        cout << "Entrez les coordonn|es (ligne colonne) : ";
         int ligne, colonne;
         cin >> ligne >> colonne;
 
@@ -119,7 +121,7 @@ int main() {
             if (ligne + j < tableau.size() && colonne < tableau[ligne + j].size()) {
                 tableau[ligne + j][colonne].caractere = texte[j];
             } else {
-                cout << "Coordonnées invalides. Le texte ne rentre pas dans le tableau." << endl;
+                cout << "Coordonn|es invalides. Le texte ne rentre pas dans le tableau." << endl;
                 break;
             }
         }
