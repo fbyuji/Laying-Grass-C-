@@ -103,6 +103,21 @@ vector<Tuile> genererTuiles() {
     // Tuile carrée 4x4
     tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}}));
 
+    // Tuile L inversé 3x3
+tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', '.'}, {'O', '.', '.'}}));
+
+// Tuile ligne horizontale 3x3
+tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'.', '.', '.'}, {'O', 'O', 'O'}}));
+
+// Tuile ligne verticale 3x3
+tuiles.push_back(Tuile({{'O', '.', 'O'}, {'O', '.', 'O'}, {'O', '.', 'O'}}));
+
+// Tuile Z 3x3
+tuiles.push_back(Tuile({{'O', 'O', '.'}, {'.', 'O', 'O'}, {'.', '.', '.'}}));
+
+// Tuile carrée avec trou 4x4
+tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}}));
+
     // Ajoutez d'autres formes de tuiles selon votre choix
 
     return tuiles;
