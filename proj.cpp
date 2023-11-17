@@ -3,133 +3,173 @@
 #include <iomanip>
 #include <algorithm>
 #include <ctime>
+#include <limits>
 
 using namespace std;
 
-// Structure pour représenter une case du tableau avec un caractère
+// Structure pour représenter une case du plateau avec un caractère
 struct Case {
     char caractere;
 
     Case(char caractere) : caractere(caractere) {}
 };
 
-// Structure ou classe pour représenter un joueur
-class Joueur {
-public:
+// Structure pour représenter une tuile d'herbe
+struct Tuile {
+    vector<vector<char>> forme;
+
+    Tuile(const vector<vector<char>>& forme) : forme(forme) {}
+};
+
+// Structure pour représenter un joueur
+struct Joueur {
     string nom;
 
     Joueur(const string& nom) : nom(nom) {}
 };
 
-void afficherTableau(const vector<vector<Case>>& tableau) {
-    // Trouver la largeur maximale nécessaire pour les chiffres de ligne
-    int largeurLigne = to_string(tableau.size() - 1).length();
-    int largeurColonne = to_string(tableau[0].size() - 1).length();
-
+// Fonction pour afficher le plateau avec les territoires des joueurs
+void afficherPlateau(const vector<vector<Case>>& plateau) {
     // Afficher les numéros de colonnes
-    cout << setw(largeurLigne + 2) << " "; // Ajustement pour les numéros de ligne
-    for (int i = 0; i < tableau[0].size(); ++i) {
-        cout << setw(largeurColonne + 1) << i;
+    cout << "   ";
+    for (int i = 0; i < plateau[0].size(); ++i) {
+        cout << setw(3) << i;
     }
     cout << endl;
 
-    // Afficher le tableau avec les numéros de lignes
-    for (int i = 0; i < tableau.size(); ++i) {
-        cout << setw(largeurLigne + 1) << i << " "; // Ajustement pour les numéros de ligne
+    // Afficher le plateau avec les numéros de lignes
+    for (int i = 0; i < plateau.size(); ++i) {
+        cout << setw(3) << i;
 
-        for (int j = 0; j < tableau[i].size(); ++j) {
-            char caractere = (tableau[i][j].caractere == 0) ? '.' : tableau[i][j].caractere;
-            cout << setw(largeurColonne + 1) << caractere;
+        for (int j = 0; j < plateau[i].size(); ++j) {
+            char caractere = (plateau[i][j].caractere == 0) ? '.' : plateau[i][j].caractere;
+            cout << setw(3) << caractere;
         }
         cout << endl;
     }
 }
 
+// Fonction pour afficher la tuile
+void afficherTuile(const Tuile& tuile) {
+    for (const auto& ligne : tuile.forme) {
+        for (char caractere : ligne) {
+            cout << caractere << " ";
+        }
+        cout << endl;
+    }
+}
 
-
-int main() {
-    // Demander le nombre de joueurs
-    cout << "Entrez le nombre de joueurs (entre 2 et 9) : ";
-    int nombreJoueurs;
-    cin >> nombreJoueurs;
-
-    cin.ignore(); // Consommer le caractère de nouvelle ligne restant
-
-    if (nombreJoueurs < 2 || nombreJoueurs > 9) {
-        cout << "Nombre de joueurs invalide. Veuillez entrer un nombre entre 2 et 9." << endl;
-        return 1;  // Terminer le programme en cas d'entrée invalide
+// Fonction pour placer une tuile sur le plateau du joueur
+bool placerTuile(Joueur& joueur, const Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau) {
+    // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
+    if (ligne + tuile.forme.size() <= plateau.size() &&
+        colonne + tuile.forme[0].size() <= plateau[0].size()) {
+        // Placer la tuile sur le plateau du joueur
+        for (int i = 0; i < tuile.forme.size(); ++i) {
+            for (int j = 0; j < tuile.forme[i].size(); ++j) {
+                plateau[ligne + i][colonne + j].caractere = tuile.forme[i][j];
+            }
+        }
+        return true;
     }
 
+    // La tuile ne peut pas être placée
+    return false;
+}
+
+// Fonction pour générer la liste de tuiles d'herbe
+vector<Tuile> genererTuiles() {
+    vector<Tuile> tuiles;
+
+    // Tuile 2x2
+    tuiles.push_back(Tuile({{'O', 'O'}, {'O', 'O'}}));
+
+    // Tuile 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', 'O', 'O'}, {'O', 'O', 'O'}}));
+
+    // Tuile L 3x3
+    tuiles.push_back(Tuile({{'O', '.', '.'}, {'O', '.', '.'}, {'O', 'O', 'O'}}));
+
+    // Tuile T 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'.', 'O', '.'}, {'.', 'O', '.'}}));
+
+    // Tuile S 3x3
+    tuiles.push_back(Tuile({{'.', 'O', 'O'}, {'O', 'O', '.'}, {'.', '.', '.'}}));
+
+    // Tuile carrée 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}}));
+
+    // Ajoutez d'autres formes de tuiles selon votre choix
+
+    return tuiles;
+}
+
+// ...
+
+int main() {
     // Initialiser le générateur de nombres aléatoires
     srand(time(0));
 
-    // Créer un vecteur de joueurs
+    // Demander le nombre de joueurs
+    int nombreJoueurs;
+    cout << "Entrez le nombre de joueurs (entre 2 et 9) : ";
+    cin >> nombreJoueurs;
+
+    if (nombreJoueurs < 2 || nombreJoueurs > 9) {
+        cout << "Nombre de joueurs invalide. Veuillez entrer un nombre entre 2 et 9." << endl;
+        return 1;
+    }
+
+    // Déterminer la taille du plateau en fonction du nombre de joueurs
+    int taillePlateau = (nombreJoueurs <= 4) ? 20 : 30;
+
+    // Créer le plateau de jeu initial avec des cases vides
+    vector<vector<Case>> plateau(taillePlateau, vector<Case>(taillePlateau, Case('.')));
+
+    // Créer les joueurs avec leur prénom et la liste de tuiles
     vector<Joueur> joueurs;
-
-    // Demander aux joueurs de saisir un nom
     for (int i = 0; i < nombreJoueurs; ++i) {
-        string nom;
-
-        cout << "Joueur " << i + 1 << ", entrez votre nom : ";
-        cin >> nom;
-
-        // Ajouter cette ligne pour consommer le caractère de nouvelle ligne restant
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        joueurs.emplace_back(nom);
+        string prenom;
+        cout << "Joueur " << i + 1 << ", entrez votre prénom : ";
+        cin >> prenom;
+        joueurs.push_back(Joueur(prenom));
     }
 
-    // Créer un vecteur d'indices de joueurs et les mélanger
-    vector<int> indicesJoueurs(nombreJoueurs);
-    for (int i = 0; i < nombreJoueurs; ++i) {
-        indicesJoueurs[i] = i;
-    }
-    random_shuffle(indicesJoueurs.begin(), indicesJoueurs.end());
+    // Mélanger l'ordre de jeu
+    random_shuffle(joueurs.begin(), joueurs.end());
 
-    // Déterminer la taille du tableau en fonction du nombre de joueurs
-    int tailleTableau = (nombreJoueurs <= 4) ? 20 : 30;
+    // Générer les tuiles d'herbe
+    vector<Tuile> tuiles = genererTuiles();
 
-    // Initialiser le tableau avec des points
-    vector<vector<Case>> tableau(tailleTableau, vector<Case>(tailleTableau, Case('.')));
+    // Boucle principale du jeu
+    for (const Tuile& tuile : tuiles) {
+        // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
+        for (Joueur& joueur : joueurs) {
+            // Afficher l'état actuel du plateau avant le placement de la tuile
+            afficherPlateau(plateau);
 
-    // Afficher l'ordre de jeu
-    cout << "Ordre de jeu : ";
-    for (int i = 0; i < nombreJoueurs; ++i) {
-        cout << joueurs[indicesJoueurs[i]].nom << " ";
-    }
-    cout << endl;
+            cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
-    // Demander à chaque joueur de jouer (remplir le tableau)
-    for (int i = 0; i < nombreJoueurs; ++i) {
-        cout << joueurs[indicesJoueurs[i]].nom << ", c'est à vous de jouer." << endl;
+            // Afficher la tuile que le joueur doit placer
+            cout << "Tuile à placer : " << endl;
+            afficherTuile(tuile);
 
-        // Demander à l'utilisateur d'écrire quelque chose dans le tableau
-        cout << "Entrez quelque chose dans le tableau (par exemple, 'Hello') : ";
-        string texte;
-        getline(cin >> ws, texte); // Consommer les espaces éventuels après le nombre
+            // Demander au joueur de choisir une position pour la tuile
+            int ligne, colonne;
+            cout << "Entrez les coordonnées (ligne colonne) : ";
+            cin >> ligne >> colonne;
 
-        // Consommer le caractère de nouvelle ligne
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        // Demander à l'utilisateur les coordonnées où écrire
-        cout << "Entrez les coordonn|es (ligne colonne) : ";
-        int ligne, colonne;
-        cin >> ligne >> colonne;
-
-        // Écrire le texte dans le tableau aux coordonnées spécifiées
-        for (int j = 0; j < texte.length(); ++j) {
-            if (ligne + j < tableau.size() && colonne < tableau[ligne + j].size()) {
-                tableau[ligne + j][colonne].caractere = texte[j];
+            // Placer la tuile sur le plateau du joueur
+            if (placerTuile(joueur, tuile, ligne, colonne, plateau)) {
+                cout << "Tuile placée avec succès." << endl;
             } else {
-                cout << "Coordonn|es invalides. Le texte ne rentre pas dans le tableau." << endl;
-                break;
+                cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
             }
         }
-
-        // Afficher le tableau mis à jour
-        afficherTableau(tableau);
     }
+
+    // Afficher l'état final du plateau
+    afficherPlateau(plateau);
 
     return 0;
 }
-
