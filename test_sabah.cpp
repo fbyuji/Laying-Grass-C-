@@ -47,24 +47,58 @@ void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& 
 
         for (int j = 0; j < plateau[i].size(); ++j) {
             char caractere = (plateau[i][j].caractere == 0) ? '.' : plateau[i][j].caractere;
-            char couleur = plateau[i][j].caractere; // La couleur du joueur est stockée dans le caractère
-            
-            // Utiliser la palette de couleurs en fonction de l'indice du joueur
-            if (couleur >= 'A' && couleur <= 'Z') {
-                cout << couleursPalette[couleur - 'A'] << "\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
+            int indiceJoueur = -1;  // Indice du joueur associé au caractère
+
+            // Trouver le joueur associé à la couleur
+            auto joueurAssocie = find_if(joueurs.begin(), joueurs.end(),
+                                         [caractere](const Joueur& joueur) {
+                                             return joueur.couleur == caractere;
+                                         });
+
+            if (joueurAssocie != joueurs.end()) {
+                indiceJoueur = distance(joueurs.begin(), joueurAssocie);
+            }
+
+            // Afficher la tuile avec la couleur du joueur associé
+            if (indiceJoueur != -1 && caractere == 'O') {
+                cout << couleursPalette[indiceJoueur] << "\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
             } else {
-                cout << "\x1B[48;5;" << couleur << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
+                cout << "\x1B[48;5;" << caractere << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
             }
         }
         cout << endl;
     }
 }
+/*void afficherPlateau(const vector<vector<Case>>& plateau) {
+    // Afficher les numéros de colonnes
+    cout << "   ";
+    for (int i = 0; i < plateau[0].size(); ++i) {
+        cout << setw(3) << i;
+    }
+    cout << endl;
+
+    // Afficher le plateau avec les numéros de lignes
+    for (int i = 0; i < plateau.size(); ++i) {
+        cout << setw(3) << i;
+
+        for (int j = 0; j < plateau[i].size(); ++j) {
+            char caractere = (plateau[i][j].caractere == 0) ? '.' : plateau[i][j].caractere;
+            cout << setw(3) << caractere;
+        }
+        cout << endl;
+    }
+}*/
+
 
 // Fonction pour afficher la tuile
 void afficherTuile(const Tuile& tuile, char couleur) {
     for (const auto& ligne : tuile.forme) {
         for (char caractere : ligne) {
-            cout << "\x1B[48;5;" << couleur - 'A' + 16 << "m\x1B[38;5;232m" << caractere << "\x1B[0m ";
+            if (caractere == 'O') {
+                cout << couleursPalette[couleur - '1'] << "\x1B[38;5;232m" << caractere << " " << "\x1B[0m";
+            } else {
+                cout << "\x1B[48;5;232m" << setw(2) << "." << " " << "\x1B[0m";
+            }
         }
         cout << endl;
     }
@@ -78,7 +112,9 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
         // Placer la tuile sur le plateau du joueur
         for (int i = 0; i < tuile.forme.size(); ++i) {
             for (int j = 0; j < tuile.forme[i].size(); ++j) {
-                plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+                if (tuile.forme[i][j] == 'O') {
+                    plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+                }
             }
         }
 
@@ -209,6 +245,7 @@ int main() {
 
                 // Changer la tuile du joueur
                 tuile = tuiles[choixTuile];
+                afficherTuile(tuile, joueur.couleur);
                 joueur.aUtiliseBonus = true;
             }
 
