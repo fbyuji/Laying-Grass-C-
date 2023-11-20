@@ -47,13 +47,23 @@ void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& 
 
         for (int j = 0; j < plateau[i].size(); ++j) {
             char caractere = (plateau[i][j].caractere == 0) ? '.' : plateau[i][j].caractere;
-            char couleur = plateau[i][j].caractere; // La couleur du joueur est stockée dans le caractère
-            
-            // Utiliser la palette de couleurs en fonction de l'indice du joueur
-            if (couleur >= 'A' && couleur <= 'Z') {
-                cout << couleursPalette[couleur - 'A'] << "\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
+            int indiceJoueur = -1;  // Indice du joueur associé au caractère
+
+            // Trouver le joueur associé à la couleur
+            auto joueurAssocie = find_if(joueurs.begin(), joueurs.end(),
+                                         [caractere](const Joueur& joueur) {
+                                             return joueur.couleur == caractere;
+                                         });
+
+            if (joueurAssocie != joueurs.end()) {
+                indiceJoueur = distance(joueurs.begin(), joueurAssocie);
+            }
+
+            // Afficher la tuile avec la couleur du joueur associé
+            if (indiceJoueur != -1 && caractere == 'O') {
+                cout << couleursPalette[indiceJoueur] << "\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
             } else {
-                cout << "\x1B[48;5;" << couleur << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
+                cout << "\x1B[48;5;" << caractere << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
             }
         }
         cout << endl;
@@ -64,7 +74,11 @@ void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& 
 void afficherTuile(const Tuile& tuile, char couleur) {
     for (const auto& ligne : tuile.forme) {
         for (char caractere : ligne) {
-            cout << "\x1B[48;5;" << couleur - 'A' + 16 << "m\x1B[38;5;232m" << caractere << "\x1B[0m ";
+            if (caractere == 'O') {
+                cout << couleursPalette[couleur - '1'] << "\x1B[38;5;232m" << caractere << " " << "\x1B[0m";
+            } else {
+                cout << "\x1B[48;5;232m" << setw(2) << "." << " " << "\x1B[0m";
+            }
         }
         cout << endl;
     }
@@ -78,7 +92,9 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
         // Placer la tuile sur le plateau du joueur
         for (int i = 0; i < tuile.forme.size(); ++i) {
             for (int j = 0; j < tuile.forme[i].size(); ++j) {
-                plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+                if (tuile.forme[i][j] == 'O') {
+                    plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+                }
             }
         }
 
@@ -150,8 +166,13 @@ int main() {
         return 1;
     }
 
-    // Créer le plateau de jeu initial avec des cases vides
-    int taillePlateau = 10; // Ajustez la taille du plateau selon vos besoins
+    // Ajuster la taille du plateau en fonction du nombre de joueurs
+    int taillePlateau;
+    if (nombreJoueurs >= 2 && nombreJoueurs <= 4) {
+        taillePlateau = 20;
+    } else if (nombreJoueurs >= 5 && nombreJoueurs <= couleursPalette.size()) {
+        taillePlateau = 30;
+    }
     vector<vector<Case>> plateau(taillePlateau, vector<Case>(taillePlateau, Case('.')));
 
     // Créer les joueurs avec leur prénom et la liste de tuiles
@@ -197,7 +218,7 @@ int main() {
             if (choixBonus == 'o' || choixBonus == 'O') {
                 // Afficher les tuiles disponibles
                 cout << "Tuiles disponibles : " << endl;
-                for (int i = 0; i < tuiles.size(); ++i) {
+                for (int i = 0; i < 5; ++i) { //Limité à 5
                     cout << i << ": " << endl;
                     afficherTuile(tuiles[i], joueur.couleur);
                 }
@@ -207,9 +228,14 @@ int main() {
                 cout << "Choisissez le numéro de la nouvelle tuile : ";
                 cin >> choixTuile;
 
-                // Changer la tuile du joueur
-                tuile = tuiles[choixTuile];
-                joueur.aUtiliseBonus = true;
+                // Vérifier si le choix est valide
+                if (choixTuile >= 0 && choixTuile < 5) {
+                    // Changer la tuile du joueur
+                    tuile = tuiles[choixTuile];
+                    joueur.aUtiliseBonus = true;
+                } else {
+                    cout << "Choix invalide. La tuile n'a pas été changée." << endl;
+                }
             }
 
             // Demander au joueur de choisir une position pour la tuile
