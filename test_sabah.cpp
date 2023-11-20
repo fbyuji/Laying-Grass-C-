@@ -3,67 +3,15 @@
 #include <iomanip>
 #include <algorithm>
 #include <ctime>
-#include <limits>
 
 using namespace std;
-
-enum Couleur {
-    ROUGE,
-    VERT,
-    BLEU,
-    JAUNE,
-    ORANGE,
-    VIOLET,
-    ROSE,
-    GRIS,
-    MARRON
-};
-
-string getCodeCouleur(Couleur couleur) {
-    // Codes d'échappement ANSI pour les couleurs du texte
-    const string RESET_COLOR = "\033[0m";
-    const string RED_TEXT = "\033[1;31m";
-    const string GREEN_TEXT = "\033[1;32m";
-    const string BLUE_TEXT = "\033[1;34m";
-    const string YELLOW_TEXT = "\033[1;33m";
-    const string ORANGE_TEXT = "\033[38;5;208m";  // Pour une teinte d'orange
-    const string PURPLE_TEXT = "\033[1;35m";
-    const string CYAN_TEXT = "\033[1;36m";
-    const string GRAY_TEXT = "\033[1;30m";
-    const string BROWN_TEXT = "\033[38;5;94m";   // Pour une teinte de marron
-
-    switch (couleur) {
-        case ROUGE:
-            return RED_TEXT;
-        case VERT:
-            return GREEN_TEXT;
-        case BLEU:
-            return BLUE_TEXT;
-        case JAUNE:
-            return YELLOW_TEXT;
-        case ORANGE:
-            return ORANGE_TEXT;
-        case VIOLET:
-            return PURPLE_TEXT;
-        case ROSE:
-            return CYAN_TEXT;
-        case GRIS:
-            return GRAY_TEXT;
-        case MARRON:
-            return BROWN_TEXT;
-        default:
-            return RESET_COLOR;  // Utiliser une couleur par défaut si la couleur n'est pas reconnue
-    }
-}
 
 // Structure pour représenter une case du plateau avec un caractère
 struct Case {
     char caractere;
-    Couleur couleur;
 
-    Case(char caractere, Couleur couleur) : caractere(caractere), couleur(couleur) {}
+    Case(char caractere) : caractere(caractere) {}
 };
-
 
 // Structure pour représenter une tuile d'herbe
 struct Tuile {
@@ -75,15 +23,17 @@ struct Tuile {
 // Structure pour représenter un joueur
 struct Joueur {
     string nom;
-    Couleur couleur;
-    bool aUtiliseBonus;
+    char couleur; // Couleur associée au joueur
+    bool aUtiliseBonus; // Indique si le joueur a utilisé sa carte bonus
 
-    Joueur(const string& nom, Couleur couleur) : nom(nom), couleur(couleur), aUtiliseBonus(false) {}
+    Joueur(const string& nom, char couleur) : nom(nom), couleur(couleur), aUtiliseBonus(false) {}
 };
 
+const string couleursDisponibles = "123456789";  // Utiliser une chaîne de caractères
+const vector<string> couleursPalette = {"\x1B[48;5;1m", "\x1B[48;5;2m", "\x1B[48;5;3m", "\x1B[48;5;4m", "\x1B[48;5;5m", "\x1B[48;5;6m", "\x1B[48;5;7m", "\x1B[48;5;8m", "\x1B[48;5;9m"};
+
 // Fonction pour afficher le plateau avec les territoires des joueurs
-void afficherPlateau(const vector<vector<Case>>& plateau) {
-    const string RESET_COLOR = "\033[0m";
+void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& joueurs) {
     // Afficher les numéros de colonnes
     cout << "   ";
     for (int i = 0; i < plateau[0].size(); ++i) {
@@ -96,39 +46,14 @@ void afficherPlateau(const vector<vector<Case>>& plateau) {
         cout << setw(3) << i;
 
         for (int j = 0; j < plateau[i].size(); ++j) {
-            Couleur couleur = plateau[i][j].couleur;
-
-            // Utiliser des couleurs différentes en fonction du caractère
-            switch (couleur) {
-                case ROUGE:
-                    cout << getCodeCouleur(ROUGE) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case VERT:
-                    cout << getCodeCouleur(VERT) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case BLEU:
-                    cout << getCodeCouleur(BLEU) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case JAUNE:
-                    cout << getCodeCouleur(JAUNE) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case ORANGE:
-                    cout << getCodeCouleur(ORANGE) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case VIOLET:
-                    cout << getCodeCouleur(VIOLET) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case ROSE:
-                    cout << getCodeCouleur(ROSE) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case GRIS:
-                    cout << getCodeCouleur(GRIS) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                case MARRON:
-                    cout << getCodeCouleur(MARRON) << setw(3) << plateau[i][j].caractere << RESET_COLOR;
-                    break;
-                default:
-                    cout << RESET_COLOR << setw(3) << plateau[i][j].caractere << RESET_COLOR;
+            char caractere = (plateau[i][j].caractere == 0) ? '.' : plateau[i][j].caractere;
+            char couleur = plateau[i][j].caractere; // La couleur du joueur est stockée dans le caractère
+            
+            // Utiliser la palette de couleurs en fonction de l'indice du joueur
+            if (couleur >= 'A' && couleur <= 'Z') {
+                cout << couleursPalette[couleur - 'A'] << "\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
+            } else {
+                cout << "\x1B[48;5;" << couleur << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
             }
         }
         cout << endl;
@@ -136,10 +61,10 @@ void afficherPlateau(const vector<vector<Case>>& plateau) {
 }
 
 // Fonction pour afficher la tuile
-void afficherTuile(const Tuile& tuile) {
+void afficherTuile(const Tuile& tuile, char couleur) {
     for (const auto& ligne : tuile.forme) {
         for (char caractere : ligne) {
-            cout << caractere << " ";
+            cout << "\x1B[48;5;" << couleur - 'A' + 16 << "m\x1B[38;5;232m" << caractere << "\x1B[0m ";
         }
         cout << endl;
     }
@@ -153,7 +78,7 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
         // Placer la tuile sur le plateau du joueur
         for (int i = 0; i < tuile.forme.size(); ++i) {
             for (int j = 0; j < tuile.forme[i].size(); ++j) {
-                plateau[ligne + i][colonne + j].caractere = tuile.forme[i][j];
+                plateau[ligne + i][colonne + j].caractere = joueur.couleur;
             }
         }
 
@@ -166,7 +91,6 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
     return false;
 }
 
-// Fonction pour générer la liste de tuiles d'herbe
 vector<Tuile> genererTuiles() {
     vector<Tuile> tuiles;
 
@@ -203,57 +127,42 @@ vector<Tuile> genererTuiles() {
     // Tuile carrée avec trou 4x4
     tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}}));
 
-        // Ajoutez d'autres formes de tuiles selon votre choix
+    // Ajoutez d'autres formes de tuiles selon votre choix
 
     return tuiles;
 }
-
-// ...
 
 int main() {
     // Initialiser le générateur de nombres aléatoires
     srand(time(0));
 
+    // Définir les couleurs disponibles pour les joueurs
+    const vector<string> couleursPalette = {"\x1B[48;5;1m", "\x1B[48;5;2m", "\x1B[48;5;3m", "\x1B[48;5;4m", "\x1B[48;5;5m", "\x1B[48;5;6m", "\x1B[48;5;7m", "\x1B[48;5;8m", "\x1B[48;5;9m"};
+
+
     // Demander le nombre de joueurs
     int nombreJoueurs;
-    cout << "Entrez le nombre de joueurs (entre 2 et 9) : ";
+    cout << "Entrez le nombre de joueurs (entre 2 et " << couleursDisponibles.size() << ") : ";
     cin >> nombreJoueurs;
 
-    if (nombreJoueurs < 2 || nombreJoueurs > 9) {
-        cout << "Nombre de joueurs invalide. Veuillez entrer un nombre entre 2 et 9." << endl;
+    if (nombreJoueurs < 2 || nombreJoueurs > couleursDisponibles.size()) {
+        cout << "Nombre de joueurs invalide. Veuillez entrer un nombre entre 2 et " << couleursDisponibles.size() << "." << endl;
         return 1;
     }
 
-    // Déterminer la taille du plateau en fonction du nombre de joueurs
-    int taillePlateau = (nombreJoueurs <= 4) ? 20 : 30;
-
     // Créer le plateau de jeu initial avec des cases vides
-    vector<vector<Case>> plateau(taillePlateau, vector<Case>(taillePlateau, Case('.', GRIS)));
+    int taillePlateau = 10; // Ajustez la taille du plateau selon vos besoins
+    vector<vector<Case>> plateau(taillePlateau, vector<Case>(taillePlateau, Case('.')));
 
     // Créer les joueurs avec leur prénom et la liste de tuiles
     vector<Joueur> joueurs;
-    vector<Couleur> couleursDisponibles = {ROUGE,VERT,BLEU,JAUNE,ORANGE,VIOLET,ROSE,GRIS,MARRON};
-
     for (int i = 0; i < nombreJoueurs; ++i) {
         string prenom;
         cout << "Joueur " << i + 1 << ", entrez votre prénom : ";
         cin >> prenom;
-
-        // Demander au joueur de choisir une couleur
-        cout << "Choisissez votre couleur (0: Rouge, 1: Vert, 2: Bleu, 3: Jaune, 4: Orange, 5: Violet, 6: Rose, 7: Gris, 8: Marron) : ";
-        int choixCouleur;
-        cin >> choixCouleur;
-
-        if (choixCouleur < 0 || choixCouleur >= couleursDisponibles.size()) {
-            cout << "Choix de couleur invalide. Attribution automatique d'une couleur." << endl;
-            joueurs.push_back(Joueur(prenom, couleursDisponibles[i]));
-        } else {
-            Couleur couleurChoisie = couleursDisponibles[choixCouleur];
-            cout << couleurChoisie << endl;
-            joueurs.push_back(Joueur(prenom, couleurChoisie));
-            couleursDisponibles.erase(remove(couleursDisponibles.begin(), couleursDisponibles.end(), couleurChoisie), couleursDisponibles.end());
-        }
+        joueurs.push_back(Joueur(prenom, couleursDisponibles[i]));
     }
+
     // Mélanger l'ordre de jeu
     random_shuffle(joueurs.begin(), joueurs.end());
 
@@ -266,22 +175,21 @@ int main() {
         for (Joueur& joueur : joueurs) {
 
             joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
-
             // Afficher l'état actuel du plateau avant le placement de la tuile
-            afficherPlateau(plateau);
+            afficherPlateau(plateau, joueurs);
 
-            cout << joueur.nom << ", c'est à vous de jouer." << joueur.couleur<< endl;
+            cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
             // Afficher la tuile que le joueur doit placer
             cout << "Tuile à placer : " << endl;
-            afficherTuile(tuile);
+            afficherTuile(tuile, joueur.couleur);
 
             // Demander au joueur s'il veut utiliser sa carte bonus
             char choixBonus;
             if (!joueur.aUtiliseBonus) {
                 cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
                 cin >> choixBonus;
-            }else {
+            } else {
                 // Si le joueur a déjà utilisé sa carte bonus, réinitialiser le choixBonus à une valeur par défaut
                 choixBonus = 'n';
             }
@@ -291,7 +199,7 @@ int main() {
                 cout << "Tuiles disponibles : " << endl;
                 for (int i = 0; i < tuiles.size(); ++i) {
                     cout << i << ": " << endl;
-                    afficherTuile(tuiles[i]);
+                    afficherTuile(tuiles[i], joueur.couleur);
                 }
 
                 // Demander au joueur de choisir une nouvelle tuile
@@ -319,7 +227,7 @@ int main() {
     }
 
     // Afficher l'état final du plateau
-    afficherPlateau(plateau);
+    afficherPlateau(plateau, joueurs);
 
     return 0;
 }
