@@ -7,38 +7,38 @@
 
 using namespace std;
 
-// Structure pour représenter une case du plateau avec un caractère
+// Structure pour reprï¿½senter une case du plateau avec un caractï¿½re
 struct Case {
     char caractere;
 
     Case(char caractere) : caractere(caractere) {}
 };
 
-// Structure pour représenter une tuile d'herbe
+// Structure pour reprï¿½senter une tuile d'herbe
 struct Tuile {
     vector<vector<char>> forme;
 
     Tuile(const vector<vector<char>>& forme) : forme(forme) {}
 };
 
-// Structure pour représenter un joueur
+// Structure pour reprï¿½senter un joueur
 struct Joueur {
     string nom;
-    bool aUtiliseBonus; // Indique si le joueur a utilisé sa carte bonus
+    bool aUtiliseBonus; // Indique si le joueur a utilisï¿½ sa carte bonus
 
     Joueur(const string& nom) : nom(nom), aUtiliseBonus(false) {}
 };
 
 // Fonction pour afficher le plateau avec les territoires des joueurs
 void afficherPlateau(const vector<vector<Case>>& plateau) {
-    // Afficher les numéros de colonnes
+    // Afficher les numï¿½ros de colonnes
     cout << "   ";
     for (int i = 0; i < plateau[0].size(); ++i) {
         cout << setw(3) << i;
     }
     cout << endl;
 
-    // Afficher le plateau avec les numéros de lignes
+    // Afficher le plateau avec les numï¿½ros de lignes
     for (int i = 0; i < plateau.size(); ++i) {
         cout << setw(3) << i;
 
@@ -62,7 +62,7 @@ void afficherTuile(const Tuile& tuile) {
 
 // Fonction pour placer une tuile sur le plateau du joueur
 bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau) {
-    // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
+    // Vï¿½rifier si la tuile peut ï¿½tre placï¿½e sans chevaucher d'autres tuiles
     if (ligne + tuile.forme.size() <= plateau.size() &&
         colonne + tuile.forme[0].size() <= plateau[0].size()) {
         // Placer la tuile sur le plateau du joueur
@@ -72,16 +72,16 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
             }
         }
 
-        // Marquer la carte bonus comme utilisée
+        // Marquer la carte bonus comme utilisï¿½e
         joueur.aUtiliseBonus = true;
         return true;
     }
 
-    // La tuile ne peut pas être placée
+    // La tuile ne peut pas ï¿½tre placï¿½e
     return false;
 }
 
-// Fonction pour générer la liste de tuiles d'herbe
+// Fonction pour gï¿½nï¿½rer la liste de tuiles d'herbe
 vector<Tuile> genererTuiles() {
     vector<Tuile> tuiles;
 
@@ -100,10 +100,10 @@ vector<Tuile> genererTuiles() {
     // Tuile S 3x3
     tuiles.push_back(Tuile({{'.', 'O', 'O'}, {'O', 'O', '.'}, {'.', '.', '.'}}));
 
-    // Tuile carrée 4x4
+    // Tuile carrï¿½e 4x4
     tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}, {'O', 'O', 'O', 'O'}}));
 
-    // Tuile L inversé 3x3
+    // Tuile L inversï¿½ 3x3
     tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', '.'}, {'O', '.', '.'}}));
 
     // Tuile ligne horizontale 3x3
@@ -115,7 +115,7 @@ vector<Tuile> genererTuiles() {
     // Tuile Z 3x3
     tuiles.push_back(Tuile({{'O', 'O', '.'}, {'.', 'O', 'O'}, {'.', '.', '.'}}));
 
-    // Tuile carrée avec trou 4x4
+    // Tuile carrï¿½e avec trou 4x4
     tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}}));
 
     // Ajoutez d'autres formes de tuiles selon votre choix
@@ -126,7 +126,7 @@ vector<Tuile> genererTuiles() {
 // ...
 
 int main() {
-    // Initialiser le générateur de nombres aléatoires
+    // Initialiser le gï¿½nï¿½rateur de nombres alï¿½atoires
     srand(time(0));
 
     // Demander le nombre de joueurs
@@ -139,85 +139,90 @@ int main() {
         return 1;
     }
 
-    // Déterminer la taille du plateau en fonction du nombre de joueurs
+    // Dï¿½terminer la taille du plateau en fonction du nombre de joueurs
     int taillePlateau = (nombreJoueurs <= 4) ? 20 : 30;
 
-    // Créer le plateau de jeu initial avec des cases vides
+    // Crï¿½er le plateau de jeu initial avec des cases vides
     vector<vector<Case>> plateau(taillePlateau, vector<Case>(taillePlateau, Case('.')));
 
-    // Créer les joueurs avec leur prénom et la liste de tuiles
+    // Crï¿½er les joueurs avec leur prï¿½nom et la liste de tuiles
     vector<Joueur> joueurs;
     for (int i = 0; i < nombreJoueurs; ++i) {
         string prenom;
-        cout << "Joueur " << i + 1 << ", entrez votre prénom : ";
+        cout << "Joueur " << i + 1 << ", entrez votre prï¿½nom : ";
         cin >> prenom;
         joueurs.push_back(Joueur(prenom));
     }
 
-    // Mélanger l'ordre de jeu
+    // Mï¿½langer l'ordre de jeu
     random_shuffle(joueurs.begin(), joueurs.end());
 
-    // Générer les tuiles d'herbe
+    // Gï¿½nï¿½rer les tuiles d'herbe
     vector<Tuile> tuiles = genererTuiles();
 
-    // Boucle principale du jeu
-    for (Tuile& tuile : tuiles) {
-        // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
-        for (Joueur& joueur : joueurs) {
+// Boucle principale du jeu
+for (Tuile& tuile : tuiles) {
+    // Ã€ chaque tour, chaque joueur reÃ§oit la premiÃ¨re tuile d'herbe de la file d'attente
+    for (Joueur& joueur : joueurs) {
 
-            joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
-            // Afficher l'état actuel du plateau avant le placement de la tuile
-            afficherPlateau(plateau);
+        joueur.aUtiliseBonus = false;  // RÃ©initialiser aUtiliseBonus Ã  false au dÃ©but de chaque tour de joueur
+        // Afficher l'Ã©tat actuel du plateau avant le placement de la tuile
+        afficherPlateau(plateau);
 
-            cout << joueur.nom << ", c'est à vous de jouer." << endl;
+        cout << joueur.nom << ", c'est Ã  vous de jouer." << endl;
 
-            // Afficher la tuile que le joueur doit placer
-            cout << "Tuile à placer : " << endl;
-            afficherTuile(tuile);
+        // Afficher la tuile que le joueur doit placer
+        cout << "Tuile Ã  placer : " << endl;
+        afficherTuile(tuile);
 
-            // Demander au joueur s'il veut utiliser sa carte bonus
-            char choixBonus;
-            if (!joueur.aUtiliseBonus) {
-                cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
-                cin >> choixBonus;
-            }else {
-                // Si le joueur a déjà utilisé sa carte bonus, réinitialiser le choixBonus à une valeur par défaut
-                choixBonus = 'n';
+        // Demander au joueur s'il veut utiliser sa carte bonus
+        char choixBonus;
+        if (!joueur.aUtiliseBonus) {
+            cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
+            cin >> choixBonus;
+        } else {
+            // Si le joueur a dÃ©jÃ  utilisÃ© sa carte bonus, rÃ©initialiser le choixBonus Ã  une valeur par dÃ©faut
+            choixBonus = 'n';
+        }
+
+        if (choixBonus == 'o' || choixBonus == 'O') {
+            // Afficher les tuiles disponibles
+            cout << "Tuiles disponibles : " << endl;
+            for (int i = 0; i < 5; ++i) {  // LimitÃ© Ã  5 tuiles
+                cout << i << ": " << endl;
+                afficherTuile(tuiles[i]);
             }
 
-            if (choixBonus == 'o' || choixBonus == 'O') {
-                // Afficher les tuiles disponibles
-                cout << "Tuiles disponibles : " << endl;
-                for (int i = 0; i < tuiles.size(); ++i) {
-                    cout << i << ": " << endl;
-                    afficherTuile(tuiles[i]);
-                }
+            // Demander au joueur de choisir une nouvelle tuile parmi les 5 premiÃ¨res
+            int choixTuile;
+            cout << "Choisissez le numÃ©ro de la nouvelle tuile (0-4) : ";
+            cin >> choixTuile;
 
-                // Demander au joueur de choisir une nouvelle tuile
-                int choixTuile;
-                cout << "Choisissez le numéro de la nouvelle tuile : ";
-                cin >> choixTuile;
-
+            // VÃ©rifier si le choix est valide
+            if (choixTuile >= 0 && choixTuile < 5) {
                 // Changer la tuile du joueur
                 tuile = tuiles[choixTuile];
                 joueur.aUtiliseBonus = true;
-            }
-
-            // Demander au joueur de choisir une position pour la tuile
-            int ligne, colonne;
-            cout << "Entrez les coordonnées (ligne colonne) : ";
-            cin >> ligne >> colonne;
-
-            // Placer la tuile sur le plateau du joueur
-            if (placerTuile(joueur, tuile, ligne, colonne, plateau)) {
-                cout << "Tuile placée avec succès." << endl;
             } else {
-                cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
+                cout << "Choix invalide. La tuile n'a pas Ã©tÃ© changÃ©e." << endl;
             }
         }
-    }
 
-    // Afficher l'état final du plateau
+        // Demander au joueur de choisir une position pour la tuile
+        int ligne, colonne;
+        cout << "Entrez les coordonnÃ©es (ligne colonne) : ";
+        cin >> ligne >> colonne;
+
+        // Placer la tuile sur le plateau du joueur
+        if (placerTuile(joueur, tuile, ligne, colonne, plateau)) {
+            cout << "Tuile placÃ©e avec succÃ¨s." << endl;
+        } else {
+            cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
+        }
+    }
+}
+
+    // Afficher l'ï¿½tat final du plateau
     afficherPlateau(plateau);
 
     return 0;
