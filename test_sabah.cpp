@@ -281,6 +281,19 @@ Tuile& choisirTuileAleatoire(vector<Tuile>& tuiles) {
     return tuiles[indiceAleatoire];
 }
 
+// Fonction pour tourner une tuile de 90 degrés
+void rotationTuile(Tuile& tuile) {
+    vector<vector<char>> nouvelleForme(tuile.forme[0].size(), vector<char>(tuile.forme.size()));
+
+    for (size_t i = 0; i < tuile.forme.size(); ++i) {
+        for (size_t j = 0; j < tuile.forme[i].size(); ++j) {
+            nouvelleForme[j][tuile.forme.size() - 1 - i] = tuile.forme[i][j];
+        }
+    }
+
+    tuile.forme = nouvelleForme;
+}
+
 
 int main() {
 
@@ -332,7 +345,7 @@ int main() {
     // Boucle principale du jeu
     for (Tuile& tuile : tuiles) {
 
-        if (nombreTours <= 3) {
+        if (nombreTours <= 9) {
             // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
             for (Joueur& joueur : joueurs) {
 
@@ -386,6 +399,23 @@ int main() {
                 }else {
                     joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
                 }
+
+                char choixRotation;
+                do {
+                    // Afficher la tuile actuelle
+                    cout << "Tuile actuelle : " << endl;
+                    afficherTuile(tuile, joueur.couleur);
+
+                    // Demander au joueur s'il veut effectuer une rotation de la tuile
+                    cout << "Voulez-vous effectuer une rotation de la tuile ? (o/n) : ";
+                    cin >> choixRotation;
+
+                    if (choixRotation == 'o' || choixRotation == 'O') {
+                        rotationTuile(tuile);
+                        cout << "Tuile rotée avec succès." << endl;
+                    }
+                } while (choixRotation == 'o' || choixRotation == 'O');
+
                 // Demander au joueur de choisir une position pour la tuile
                 int ligne, colonne;
                 cout << "Entrez les coordonnées (ligne colonne) : ";
