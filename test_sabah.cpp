@@ -86,30 +86,33 @@ void afficherTuile(const Tuile& tuile, char couleur) {
     }
 }
 
-/*// Fonction pour placer une tuile sur le plateau du joueur
-bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau) {
-    // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
-    if (ligne + tuile.forme.size() <= plateau.size() &&
-        colonne + tuile.forme[0].size() <= plateau[0].size()) {
-        // Placer la tuile sur le plateau du joueur
-        for (int i = 0; i < tuile.forme.size(); ++i) {
-            for (int j = 0; j < tuile.forme[i].size(); ++j) {
-                if (tuile.forme[i][j] == 'O') {
-                    plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+bool peutPlacerTuile(const Joueur& joueur, const Tuile& tuile, int ligne, int colonne, const vector<vector<Case>>& plateau) {
+    for (int i = 0; i < tuile.forme.size(); ++i) {
+        for (int j = 0; j < tuile.forme[i].size(); ++j) {
+            if (tuile.forme[i][j] == 'O') {
+                int nouvelleLigne = ligne + i;
+                int nouvelleColonne = colonne + j;
+
+                // Vérifier si la case est en dehors du plateau
+                if (nouvelleLigne < 0 || nouvelleLigne >= plateau.size() || nouvelleColonne < 0 || nouvelleColonne >= plateau[0].size()) {
+                    return false;
+                }
+
+                // Vérifier si la case appartient à un joueur adverse
+                if (plateau[nouvelleLigne][nouvelleColonne].caractere != '.' && plateau[nouvelleLigne][nouvelleColonne].caractere != joueur.couleur) {
+                    return false;
                 }
             }
         }
-        return true;
     }
-
-    // La tuile ne peut pas être placée
-    return false;
-}*/
+    return true;
+}
 
 bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau, bool premiereTuile) {
     // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
     if (ligne + tuile.forme.size() <= plateau.size() &&
-        colonne + tuile.forme[0].size() <= plateau[0].size()) {
+        colonne + tuile.forme[0].size() <= plateau[0].size()&&
+        peutPlacerTuile(joueur, tuile, ligne, colonne, plateau)) {
 
         // Vérifier si la nouvelle tuile touche au moins un côté d'une tuile du joueur
         bool toucheTuileDuJoueur = false;
@@ -333,11 +336,12 @@ int main() {
             // Placer la tuile sur le plateau du joueur
             if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
                 cout << "Tuile placée avec succès." << endl;
+                joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
             } else {
                 cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
             }
 
-            joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+            
         }
     }
 

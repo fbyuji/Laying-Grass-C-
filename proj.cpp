@@ -86,25 +86,6 @@ void afficherTuile(const Tuile& tuile, char couleur) {
     }
 }
 
-/*// Fonction pour placer une tuile sur le plateau du joueur
-bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau) {
-    // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
-    if (ligne + tuile.forme.size() <= plateau.size() &&
-        colonne + tuile.forme[0].size() <= plateau[0].size()) {
-        // Placer la tuile sur le plateau du joueur
-        for (int i = 0; i < tuile.forme.size(); ++i) {
-            for (int j = 0; j < tuile.forme[i].size(); ++j) {
-                if (tuile.forme[i][j] == 'O') {
-                    plateau[ligne + i][colonne + j].caractere = joueur.couleur;
-                }
-            }
-        }
-        return true;
-    }
-
-    // La tuile ne peut pas être placée
-    return false;
-}*/
 
 bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau, bool premiereTuile) {
     // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
@@ -278,15 +259,11 @@ int main() {
             // Afficher l'état actuel du plateau avant le placement de la tuile
             afficherPlateau(plateau, joueurs);
 
-            cout << joueur.aUtiliseBonus << endl;
-
             cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
             // Afficher la tuile que le joueur doit placer
             cout << "Tuile à placer : " << endl;
             afficherTuile(tuile, joueur.couleur);
-
-            cout << joueur.premiereTuile << endl;
 
             // Demander au joueur s'il veut utiliser sa carte bonus
             char choixBonus;
@@ -322,8 +299,6 @@ int main() {
             }else {
                 joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
             }
-
-            cout << joueur.aUtiliseBonus << endl;
 
             // Demander au joueur de choisir une position pour la tuile
             int ligne, colonne;
