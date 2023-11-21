@@ -69,26 +69,6 @@ void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& 
         cout << endl;
     }
 }
-/*void afficherPlateau(const vector<vector<Case>>& plateau) {
-    // Afficher les numéros de colonnes
-    cout << "   ";
-    for (int i = 0; i < plateau[0].size(); ++i) {
-        cout << setw(3) << i;
-    }
-    cout << endl;
-
-    // Afficher le plateau avec les numéros de lignes
-    for (int i = 0; i < plateau.size(); ++i) {
-        cout << setw(3) << i;
-
-        for (int j = 0; j < plateau[i].size(); ++j) {
-            char caractere = (plateau[i][j].caractere == 0) ? '.' : plateau[i][j].caractere;
-            cout << setw(3) << caractere;
-        }
-        cout << endl;
-    }
-}*/
-
 
 // Fonction pour afficher la tuile
 void afficherTuile(const Tuile& tuile, char couleur) {
@@ -117,9 +97,6 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                 }
             }
         }
-
-        // Marquer la carte bonus comme utilisée
-        joueur.aUtiliseBonus = true;
         return true;
     }
 
@@ -186,8 +163,13 @@ int main() {
         return 1;
     }
 
-    // Créer le plateau de jeu initial avec des cases vides
-    int taillePlateau = 10; // Ajustez la taille du plateau selon vos besoins
+    // Ajuster la taille du plateau en fonction du nombre de joueurs
+    int taillePlateau;
+    if (nombreJoueurs >= 2 && nombreJoueurs <= 4) {
+        taillePlateau = 20;
+    } else if (nombreJoueurs >= 5 && nombreJoueurs <= couleursPalette.size()) {
+        taillePlateau = 30;
+    }
     vector<vector<Case>> plateau(taillePlateau, vector<Case>(taillePlateau, Case('.')));
 
     // Créer les joueurs avec leur prénom et la liste de tuiles
@@ -210,9 +192,10 @@ int main() {
         // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
         for (Joueur& joueur : joueurs) {
 
-            joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
             // Afficher l'état actuel du plateau avant le placement de la tuile
             afficherPlateau(plateau, joueurs);
+
+            cout << joueur.aUtiliseBonus << endl;
 
             cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
@@ -233,7 +216,7 @@ int main() {
             if (choixBonus == 'o' || choixBonus == 'O') {
                 // Afficher les tuiles disponibles
                 cout << "Tuiles disponibles : " << endl;
-                for (int i = 0; i < tuiles.size(); ++i) {
+                for (int i = 0; i < 5; ++i) { //Limité à 5
                     cout << i << ": " << endl;
                     afficherTuile(tuiles[i], joueur.couleur);
                 }
@@ -243,11 +226,19 @@ int main() {
                 cout << "Choisissez le numéro de la nouvelle tuile : ";
                 cin >> choixTuile;
 
-                // Changer la tuile du joueur
-                tuile = tuiles[choixTuile];
-                afficherTuile(tuile, joueur.couleur);
-                joueur.aUtiliseBonus = true;
+                // Vérifier si le choix est valide
+                if (choixTuile >= 0 && choixTuile < 5) {
+                    // Changer la tuile du joueur
+                    tuile = tuiles[choixTuile];
+                    joueur.aUtiliseBonus = true;
+                } else {
+                    cout << "Choix invalide. La tuile n'a pas été changée." << endl;
+                }
+            }else {
+                joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
             }
+
+            cout << joueur.aUtiliseBonus << endl;
 
             // Demander au joueur de choisir une position pour la tuile
             int ligne, colonne;

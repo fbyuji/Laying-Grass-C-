@@ -97,9 +97,6 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                 }
             }
         }
-
-        // Marquer la carte bonus comme utilisée
-        joueur.aUtiliseBonus = true;
         return true;
     }
 
@@ -195,9 +192,10 @@ int main() {
         // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
         for (Joueur& joueur : joueurs) {
 
-            joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
             // Afficher l'état actuel du plateau avant le placement de la tuile
             afficherPlateau(plateau, joueurs);
+
+            cout << joueur.aUtiliseBonus << endl;
 
             cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
@@ -236,7 +234,11 @@ int main() {
                 } else {
                     cout << "Choix invalide. La tuile n'a pas été changée." << endl;
                 }
+            }else {
+                joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
             }
+
+            cout << joueur.aUtiliseBonus << endl;
 
             // Demander au joueur de choisir une position pour la tuile
             int ligne, colonne;
