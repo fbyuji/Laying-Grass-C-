@@ -25,9 +25,11 @@ struct Joueur {
     string nom;
     char couleur; // Couleur associée au joueur
     bool aUtiliseBonus; // Indique si le joueur a utilisé sa carte bonus
+    bool premiereTuile; // Indique si c'est la première tuile du joueur dans le tour
 
-    Joueur(const string& nom, char couleur) : nom(nom), couleur(couleur), aUtiliseBonus(false) {}
+    Joueur(const string& nom, char couleur) : nom(nom), couleur(couleur), aUtiliseBonus(false), premiereTuile(true) {}
 };
+
 
 const string couleursDisponibles = "123456789";  // Utiliser une chaîne de caractères
 const vector<string> couleursPalette = {"\x1B[48;5;1m", "\x1B[48;5;2m", "\x1B[48;5;3m", "\x1B[48;5;4m", "\x1B[48;5;5m", "\x1B[48;5;6m", "\x1B[48;5;7m", "\x1B[48;5;8m", "\x1B[48;5;9m"};
@@ -84,7 +86,7 @@ void afficherTuile(const Tuile& tuile, char couleur) {
     }
 }
 
-// Fonction pour placer une tuile sur le plateau du joueur
+/*// Fonction pour placer une tuile sur le plateau du joueur
 bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau) {
     // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
     if (ligne + tuile.forme.size() <= plateau.size() &&
@@ -102,7 +104,55 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
 
     // La tuile ne peut pas être placée
     return false;
+}*/
+
+bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau, bool premiereTuile) {
+    // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
+    if (ligne + tuile.forme.size() <= plateau.size() &&
+        colonne + tuile.forme[0].size() <= plateau[0].size()) {
+
+        // Vérifier si la nouvelle tuile touche au moins un côté d'une tuile du joueur
+        bool toucheTuileDuJoueur = false;
+
+        // Pour la première tuile, autoriser le placement n'importe où
+        if (!premiereTuile) {
+            for (int i = 0; i < tuile.forme.size(); ++i) {
+                for (int j = 0; j < tuile.forme[i].size(); ++j) {
+                    if (tuile.forme[i][j] == 'O') {
+                        // Vérifier si la case voisine appartient au joueur
+                        if (ligne + i - 1 >= 0 && plateau[ligne + i - 1][colonne + j].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        } else if (colonne + j - 1 >= 0 && plateau[ligne + i][colonne + j - 1].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        } else if (ligne + i + 1 < plateau.size() && plateau[ligne + i + 1][colonne + j].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        } else if (colonne + j + 1 < plateau[0].size() && plateau[ligne + i][colonne + j + 1].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        }
+                    }
+                }
+            }
+        } else {
+            toucheTuileDuJoueur = true; // Pour la première tuile, autoriser le placement n'importe où
+        }
+
+        // Placer la tuile sur le plateau du joueur si la condition est satisfaite
+        if (toucheTuileDuJoueur) {
+            for (int i = 0; i < tuile.forme.size(); ++i) {
+                for (int j = 0; j < tuile.forme[i].size(); ++j) {
+                    if (tuile.forme[i][j] == 'O') {
+                        plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    // La tuile ne peut pas être placée
+    return false;
 }
+
 
 vector<Tuile> genererTuiles() {
     vector<Tuile> tuiles;
@@ -186,7 +236,7 @@ int main() {
 
     // Générer les tuiles d'herbe
     vector<Tuile> tuiles = genererTuiles();
-
+    
     // Boucle principale du jeu
     for (Tuile& tuile : tuiles) {
         // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
@@ -202,6 +252,8 @@ int main() {
             // Afficher la tuile que le joueur doit placer
             cout << "Tuile à placer : " << endl;
             afficherTuile(tuile, joueur.couleur);
+
+            cout << joueur.premiereTuile << endl;
 
             // Demander au joueur s'il veut utiliser sa carte bonus
             char choixBonus;
@@ -246,11 +298,13 @@ int main() {
             cin >> ligne >> colonne;
 
             // Placer la tuile sur le plateau du joueur
-            if (placerTuile(joueur, tuile, ligne, colonne, plateau)) {
+            if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
                 cout << "Tuile placée avec succès." << endl;
             } else {
                 cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
             }
+
+            joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
         }
     }
 
