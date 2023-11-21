@@ -223,10 +223,57 @@ vector<Tuile> genererTuiles() {
     return tuiles;
 }
 
-    // Fonction pour mélanger l'ordre des tuiles
-    void melangerTuiles(vector<Tuile>& tuiles) {
-        random_shuffle(tuiles.begin(), tuiles.end());
+// Fonction pour mélanger l'ordre des tuiles
+void melangerTuiles(vector<Tuile>& tuiles) {
+    random_shuffle(tuiles.begin(), tuiles.end());
+}
+
+// Fonction pour calculer la superficie du territoire d'un joueur
+int calculerSuperficieTerritoire(const vector<vector<Case>>& plateau, char couleur) {
+    int superficie = 0;
+    for (const auto& ligne : plateau) {
+        for (const Case& cellule : ligne) {
+            if (cellule.caractere == couleur) {
+                superficie++;
+            }
+        }
     }
+    return superficie;
+}
+
+// Fonction pour calculer le nombre de carrés d'un joueur
+int calculerNombreCarres(const vector<vector<Case>>& plateau, char couleur) {
+    int nombreCarres = 0;
+    for (const auto& ligne : plateau) {
+        for (const Case& cellule : ligne) {
+            if (cellule.caractere == couleur) {
+                nombreCarres++;
+            }
+        }
+    }
+    return nombreCarres;
+}
+
+// Fonction pour déterminer le vainqueur
+Joueur determinerVainqueur(const vector<vector<Case>>& plateau, const vector<Joueur>& joueurs) {
+    Joueur vainqueur = joueurs[0]; // Initialiser avec le premier joueur
+    int superficieMax = calculerSuperficieTerritoire(plateau, vainqueur.couleur);
+    int nombreCarresMax = calculerNombreCarres(plateau, vainqueur.couleur);
+
+    for (size_t i = 1; i < joueurs.size(); ++i) {
+        int superficieJoueur = calculerSuperficieTerritoire(plateau, joueurs[i].couleur);
+        int nombreCarresJoueur = calculerNombreCarres(plateau, joueurs[i].couleur);
+
+        if (superficieJoueur > superficieMax || (superficieJoueur == superficieMax && nombreCarresJoueur > nombreCarresMax)) {
+            vainqueur = joueurs[i];
+            superficieMax = superficieJoueur;
+            nombreCarresMax = nombreCarresJoueur;
+        }
+    }
+
+    return vainqueur;
+}
+
 
 int main() {
 
@@ -279,7 +326,7 @@ int main() {
     // Boucle principale du jeu
     for (Tuile& tuile : tuiles) {
 
-        if (nombreTours <= 9) {
+        if (nombreTours <= 3) {
             // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
             for (Joueur& joueur : joueurs) {
 
@@ -345,7 +392,7 @@ int main() {
                 } else {
                     cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
                 }  
-                
+
                 nombreTours++; // Augmenter le nombre de tours après chaque tour de boucle
             }
         }else {
@@ -357,6 +404,11 @@ int main() {
 
     // Afficher l'état final du plateau
     afficherPlateau(plateau, joueurs);
+
+    // À la fin du programme
+    Joueur vainqueur = determinerVainqueur(plateau, joueurs);
+    cout << "Le joueur " << vainqueur.nom << " remporte la partie !" << endl;
+
 
     return 0;
 }
