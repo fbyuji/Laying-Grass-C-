@@ -276,6 +276,11 @@ Joueur determinerVainqueur(const vector<vector<Case>>& plateau, const vector<Jou
     return vainqueur;
 }
 
+Tuile& choisirTuileAleatoire(vector<Tuile>& tuiles) {
+    int indiceAleatoire = rand() % tuiles.size();
+    return tuiles[indiceAleatoire];
+}
+
 
 int main() {
 
@@ -324,7 +329,6 @@ int main() {
     
     // Mélanger l'ordre des tuiles
     melangerTuiles(tuiles);
-    
     // Boucle principale du jeu
     for (Tuile& tuile : tuiles) {
 
@@ -335,6 +339,8 @@ int main() {
                 // Tuile 1*1 par defaut pour le premier tour
                 if (joueur.premiereTuile) {
                     tuile = Tuile('O');
+                }else {
+                    tuile = choisirTuileAleatoire(tuiles);
                 }
 
                 // Afficher l'état actuel du plateau avant le placement de la tuile
