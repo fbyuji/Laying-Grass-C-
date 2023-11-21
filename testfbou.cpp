@@ -285,10 +285,10 @@ int main() {
             // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
             for (Joueur& joueur : joueurs) {
 
-        // Tuile 1*1 par defaut pour le premier tour
-        if (joueur.premiereTuile) {
-            tuile = Tuile('O');
-        }
+                // Tuile 1*1 par defaut pour le premier tour
+                if (joueur.premiereTuile) {
+                    tuile = Tuile('O');
+                }
 
 
                 // Afficher l'état actuel du plateau avant le placement de la tuile
@@ -306,7 +306,7 @@ int main() {
 
                 // Demander au joueur s'il veut utiliser sa carte bonus
                 char choixBonus;
-                if (!joueur.aUtiliseBonus) {
+                if (!joueur.aUtiliseBonus && !joueur.premiereTuile) {
                     cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
                     cin >> choixBonus;
                 } else {

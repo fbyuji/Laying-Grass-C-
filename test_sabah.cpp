@@ -18,6 +18,8 @@ struct Tuile {
     vector<vector<char>> forme;
 
     Tuile(const vector<vector<char>>& forme) : forme(forme) {}
+
+    Tuile(char caractere) : forme({{caractere}}) {} //constructor tuile 1*1
 };
 
 // Structure pour représenter un joueur
@@ -330,10 +332,13 @@ int main() {
             // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
             for (Joueur& joueur : joueurs) {
 
+                // Tuile 1*1 par defaut pour le premier tour
+                if (joueur.premiereTuile) {
+                    tuile = Tuile('O');
+                }
+
                 // Afficher l'état actuel du plateau avant le placement de la tuile
                 afficherPlateau(plateau, joueurs);
-
-                cout << joueur.aUtiliseBonus << endl;
 
                 cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
@@ -341,11 +346,9 @@ int main() {
                 cout << "Tuile à placer : " << endl;
                 afficherTuile(tuile, joueur.couleur);
 
-                cout << joueur.premiereTuile << endl;
-
                 // Demander au joueur s'il veut utiliser sa carte bonus
                 char choixBonus;
-                if (!joueur.aUtiliseBonus) {
+                if (!joueur.aUtiliseBonus && !joueur.premiereTuile) {
                     cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
                     cin >> choixBonus;
                 } else {
@@ -377,9 +380,6 @@ int main() {
                 }else {
                     joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
                 }
-
-                cout << joueur.aUtiliseBonus << endl;
-
                 // Demander au joueur de choisir une position pour la tuile
                 int ligne, colonne;
                 cout << "Entrez les coordonnées (ligne colonne) : ";
