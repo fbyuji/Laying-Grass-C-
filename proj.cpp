@@ -229,6 +229,9 @@ vector<Tuile> genererTuiles() {
     }
 
 int main() {
+
+    int nombreTours = 0;
+
     // Initialiser le générateur de nombres aléatoires
     srand(time(0));
 
@@ -275,74 +278,81 @@ int main() {
     
     // Boucle principale du jeu
     for (Tuile& tuile : tuiles) {
-        // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
-        for (Joueur& joueur : joueurs) {
 
-            // Afficher l'état actuel du plateau avant le placement de la tuile
-            afficherPlateau(plateau, joueurs);
+        if (nombreTours <= 9) {
+            // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
+            for (Joueur& joueur : joueurs) {
 
-            cout << joueur.aUtiliseBonus << endl;
+                // Afficher l'état actuel du plateau avant le placement de la tuile
+                afficherPlateau(plateau, joueurs);
 
-            cout << joueur.nom << ", c'est à vous de jouer." << endl;
+                cout << joueur.aUtiliseBonus << endl;
 
-            // Afficher la tuile que le joueur doit placer
-            cout << "Tuile à placer : " << endl;
-            afficherTuile(tuile, joueur.couleur);
+                cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
-            cout << joueur.premiereTuile << endl;
+                // Afficher la tuile que le joueur doit placer
+                cout << "Tuile à placer : " << endl;
+                afficherTuile(tuile, joueur.couleur);
 
-            // Demander au joueur s'il veut utiliser sa carte bonus
-            char choixBonus;
-            if (!joueur.aUtiliseBonus) {
-                cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
-                cin >> choixBonus;
-            } else {
-                // Si le joueur a déjà utilisé sa carte bonus, réinitialiser le choixBonus à une valeur par défaut
-                choixBonus = 'n';
-            }
+                cout << joueur.premiereTuile << endl;
 
-            if (choixBonus == 'o' || choixBonus == 'O') {
-                // Afficher les tuiles disponibles
-                cout << "Tuiles disponibles : " << endl;
-                for (int i = 0; i < 5; ++i) { //Limité à 5
-                    cout << i << ": " << endl;
-                    afficherTuile(tuiles[i], joueur.couleur);
-                }
-
-                // Demander au joueur de choisir une nouvelle tuile
-                int choixTuile;
-                cout << "Choisissez le numéro de la nouvelle tuile : ";
-                cin >> choixTuile;
-
-                // Vérifier si le choix est valide
-                if (choixTuile >= 0 && choixTuile < 5) {
-                    // Changer la tuile du joueur
-                    tuile = tuiles[choixTuile];
-                    joueur.aUtiliseBonus = true;
+                // Demander au joueur s'il veut utiliser sa carte bonus
+                char choixBonus;
+                if (!joueur.aUtiliseBonus) {
+                    cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
+                    cin >> choixBonus;
                 } else {
-                    cout << "Choix invalide. La tuile n'a pas été changée." << endl;
+                    // Si le joueur a déjà utilisé sa carte bonus, réinitialiser le choixBonus à une valeur par défaut
+                    choixBonus = 'n';
                 }
-            }else {
-                joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
+
+                if (choixBonus == 'o' || choixBonus == 'O') {
+                    // Afficher les tuiles disponibles
+                    cout << "Tuiles disponibles : " << endl;
+                    for (int i = 0; i < 5; ++i) { //Limité à 5
+                        cout << i << ": " << endl;
+                        afficherTuile(tuiles[i], joueur.couleur);
+                    }
+
+                    // Demander au joueur de choisir une nouvelle tuile
+                    int choixTuile;
+                    cout << "Choisissez le numéro de la nouvelle tuile : ";
+                    cin >> choixTuile;
+
+                    // Vérifier si le choix est valide
+                    if (choixTuile >= 0 && choixTuile < 5) {
+                        // Changer la tuile du joueur
+                        tuile = tuiles[choixTuile];
+                        joueur.aUtiliseBonus = true;
+                    } else {
+                        cout << "Choix invalide. La tuile n'a pas été changée." << endl;
+                    }
+                }else {
+                    joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
+                }
+
+                cout << joueur.aUtiliseBonus << endl;
+
+                // Demander au joueur de choisir une position pour la tuile
+                int ligne, colonne;
+                cout << "Entrez les coordonnées (ligne colonne) : ";
+                cin >> ligne >> colonne;
+
+                // Placer la tuile sur le plateau du joueur
+                if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
+                    cout << "Tuile placée avec succès." << endl;
+                    joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+                } else {
+                    cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
+                }  
+                
+                nombreTours++; // Augmenter le nombre de tours après chaque tour de boucle
             }
-
-            cout << joueur.aUtiliseBonus << endl;
-
-            // Demander au joueur de choisir une position pour la tuile
-            int ligne, colonne;
-            cout << "Entrez les coordonnées (ligne colonne) : ";
-            cin >> ligne >> colonne;
-
-            // Placer la tuile sur le plateau du joueur
-            if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
-                cout << "Tuile placée avec succès." << endl;
-                joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
-            } else {
-                cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
-            }
-
-            
+        }else {
+            cout << "Fin de la partie. Nombre maximum de tours atteint." << endl;
+            break; // Sortir de la boucle si le nombre de tours est atteint
         }
+        
     }
 
     // Afficher l'état final du plateau
