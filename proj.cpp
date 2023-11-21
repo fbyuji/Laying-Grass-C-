@@ -86,11 +86,33 @@ void afficherTuile(const Tuile& tuile, char couleur) {
     }
 }
 
+bool peutPlacerTuile(const Joueur& joueur, const Tuile& tuile, int ligne, int colonne, const vector<vector<Case>>& plateau) {
+    for (int i = 0; i < tuile.forme.size(); ++i) {
+        for (int j = 0; j < tuile.forme[i].size(); ++j) {
+            if (tuile.forme[i][j] == 'O') {
+                int nouvelleLigne = ligne + i;
+                int nouvelleColonne = colonne + j;
+
+                // Vérifier si la case est en dehors du plateau
+                if (nouvelleLigne < 0 || nouvelleLigne >= plateau.size() || nouvelleColonne < 0 || nouvelleColonne >= plateau[0].size()) {
+                    return false;
+                }
+
+                // Vérifier si la case appartient à un joueur adverse
+                if (plateau[nouvelleLigne][nouvelleColonne].caractere != '.' && plateau[nouvelleLigne][nouvelleColonne].caractere != joueur.couleur) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
 
 bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau, bool premiereTuile) {
     // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
     if (ligne + tuile.forme.size() <= plateau.size() &&
-        colonne + tuile.forme[0].size() <= plateau[0].size()) {
+        colonne + tuile.forme[0].size() <= plateau[0].size()&&
+        peutPlacerTuile(joueur, tuile, ligne, colonne, plateau)) {
 
         // Vérifier si la nouvelle tuile touche au moins un côté d'une tuile du joueur
         bool toucheTuileDuJoueur = false;
@@ -259,11 +281,15 @@ int main() {
             // Afficher l'état actuel du plateau avant le placement de la tuile
             afficherPlateau(plateau, joueurs);
 
+            cout << joueur.aUtiliseBonus << endl;
+
             cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
             // Afficher la tuile que le joueur doit placer
             cout << "Tuile à placer : " << endl;
             afficherTuile(tuile, joueur.couleur);
+
+            cout << joueur.premiereTuile << endl;
 
             // Demander au joueur s'il veut utiliser sa carte bonus
             char choixBonus;
@@ -300,6 +326,8 @@ int main() {
                 joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
             }
 
+            cout << joueur.aUtiliseBonus << endl;
+
             // Demander au joueur de choisir une position pour la tuile
             int ligne, colonne;
             cout << "Entrez les coordonnées (ligne colonne) : ";
@@ -308,11 +336,12 @@ int main() {
             // Placer la tuile sur le plateau du joueur
             if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
                 cout << "Tuile placée avec succès." << endl;
+                joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
             } else {
                 cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
             }
 
-            joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+            
         }
     }
 
