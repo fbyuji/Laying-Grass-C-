@@ -190,10 +190,40 @@ vector<Tuile> genererTuiles() {
     // Tuile carrée avec trou 4x4
     tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}}));
 
-    // Ajoutez d'autres formes de tuiles selon votre choix
+    // Tuile en forme de flèche 3x3
+    tuiles.push_back(Tuile({{'.', 'O', '.'}, {'O', 'O', 'O'}, {'.', 'O', '.'}}));
+
+    // Tuile en forme de croix 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'.', 'O', '.'}, {'O', '.', 'O'}}));
+
+    // Tuile en forme de losange 3x3
+    tuiles.push_back(Tuile({{'.', 'O', '.'}, {'O', 'O', 'O'}, {'.', 'O', '.'}}));
+
+    // Tuile en forme de U 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'O', '.', 'O'}, {'O', 'O', 'O'}}));
+
+    // Tuile en forme de carré avec coin manquant 3x3
+    tuiles.push_back(Tuile({{'O', 'O', '.'}, {'O', '.', 'O'}, {'.', 'O', 'O'}}));
+
+    // Tuile en forme de T inversé 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', 'O'}, {'O', '.', 'O'}}));
+
+    // Tuile en forme de S inversé 3x3
+    tuiles.push_back(Tuile({{'.', 'O', '.'}, {'.', 'O', 'O'}, {'O', 'O', '.'}}));
+
+    // Tuile en forme de L inversé miroir 3x3
+    tuiles.push_back(Tuile({{'.', '.', 'O'}, {'O', '.', 'O'}, {'O', 'O', 'O'}}));
+
+    // Tuile en forme de L miroir 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', '.'}, {'O', '.', '.'}}));
 
     return tuiles;
 }
+
+    // Fonction pour mélanger l'ordre des tuiles
+    void melangerTuiles(vector<Tuile>& tuiles) {
+        random_shuffle(tuiles.begin(), tuiles.end());
+    }
 
 int main() {
     // Initialiser le générateur de nombres aléatoires
@@ -236,6 +266,9 @@ int main() {
 
     // Générer les tuiles d'herbe
     vector<Tuile> tuiles = genererTuiles();
+    
+    // Mélanger l'ordre des tuiles
+    melangerTuiles(tuiles);
     
     // Boucle principale du jeu
     for (Tuile& tuile : tuiles) {
