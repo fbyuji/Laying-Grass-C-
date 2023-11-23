@@ -612,58 +612,58 @@ int main() {
             cout << "Fin de la partie. Nombre maximum de tours atteint." << endl;
 
             for (Joueur& joueur : joueurs) {
-                            char choixFinal;
-                            if (joueur.couponsEchange>=1){
-                                cout << joueur.nom << ", c'est à vous de faire votre choix final." << endl;
-                                cout << "Voulez-vous utiliser votre coupon pour utiliser la tuile finale ? (o/n) : ";
-                                cin >> choixFinal;
-                            }else {
-                                cout << joueur.nom << ", vous avez déjà utiliser tous vos coupons, pas de choix final pour vous." << endl;
-                                // Si le joueur a déjà utilisé sa carte bonus
-                                choixFinal = 'n';
+                char choixFinal;
+                if (joueur.couponsEchange>=1){
+                    cout << joueur.nom << ", c'est à vous de faire votre choix final." << endl;
+                    cout << "Voulez-vous utiliser votre coupon pour utiliser la tuile finale ? (o/n) : ";
+                    cin >> choixFinal;
+                }else {
+                    cout << joueur.nom << ", vous avez déjà utiliser tous vos coupons, pas de choix final pour vous." << endl;
+                    // Si le joueur a déjà utilisé sa carte bonus
+                    choixFinal = 'n';
+                }
+                if (choixFinal == 'o' || choixFinal == 'O') {
+                    
+                    tuile = Tuile('O');
+
+                    // Afficher l'état actuel du plateau avant le placement de la tuile
+                    afficherPlateau(plateau, joueurs);
+
+                    cout << joueur.nom << ", c'est à vous de jouer." << endl;
+
+                    // Afficher la tuile que le joueur doit placer
+                    cout << "Tuile à placer : " << endl;
+                    afficherTuile(tuile, joueur.couleur);
+
+                    int ligne, colonne;
+                    cout << "Entrez les coordonnées (ligne colonne) : ";
+                    cin >> ligne >> colonne;
+
+                    // Placer la tuile sur le plateau du joueur
+                    if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
+                        cout << "Tuile placée avec succès." << endl;
+                        afficherPlateau(plateau, joueurs);
+                        joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+                        if (joueur.pierreDebloque) {
+                            tuile = Tuile('X');
+                            cout << "Tuile à placer : " << endl;
+                            afficherTuile(tuile, joueur.couleur);
+                            int ligne, colonne;
+                            cout << "Entrez les coordonnées (ligne colonne) : ";
+                            cin >> ligne >> colonne;
+
+                            // Placer la pierre sur le plateau du joueur
+                            if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
+                                cout << "Pierre placée avec succès." << endl;
+                            } else {
+                                cout << "Impossible de placer la tuile. Vous perdez votre pierre." << endl;
                             }
-                            if (choixFinal == 'o' || choixFinal == 'O') {
-                                
-                                tuile = Tuile('O');
+                        }
+                    } else {
+                        cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
+                    }
 
-                                // Afficher l'état actuel du plateau avant le placement de la tuile
-                                afficherPlateau(plateau, joueurs);
-
-                                cout << joueur.nom << ", c'est à vous de jouer." << endl;
-
-                                // Afficher la tuile que le joueur doit placer
-                                cout << "Tuile à placer : " << endl;
-                                afficherTuile(tuile, joueur.couleur);
-
-                                int ligne, colonne;
-                                cout << "Entrez les coordonnées (ligne colonne) : ";
-                                cin >> ligne >> colonne;
-
-                                // Placer la tuile sur le plateau du joueur
-                                if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
-                                    cout << "Tuile placée avec succès." << endl;
-                                    afficherPlateau(plateau, joueurs);
-                                    joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
-                                    if (joueur.pierreDebloque) {
-                                        tuile = Tuile('X');
-                                        cout << "Tuile à placer : " << endl;
-                                        afficherTuile(tuile, joueur.couleur);
-                                        int ligne, colonne;
-                                        cout << "Entrez les coordonnées (ligne colonne) : ";
-                                        cin >> ligne >> colonne;
-
-                                        // Placer la pierre sur le plateau du joueur
-                                        if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
-                                            cout << "Pierre placée avec succès." << endl;
-                                        } else {
-                                            cout << "Impossible de placer la tuile. Vous perdez votre pierre." << endl;
-                                        }
-                                    }
-                                } else {
-                                    cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
-                                }
-
-                            }
+                }
                             
                            
             }

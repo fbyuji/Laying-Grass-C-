@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Structure pour représenter une case du plateau avec un caractère et une couleur
+// Structure pour représenter une case du plateau avec un caractère
 struct Case {
     char caractere;
 
@@ -20,7 +20,7 @@ struct Tuile {
 
     Tuile(const vector<vector<char>>& forme) : forme(forme) {}
 
-    Tuile(char caractere) : forme({{caractere}}) {} //constructor tuile 1*1
+    Tuile(char caractere) : forme({{caractere}}) {}
 };
 
 // Structure pour représenter un joueur
@@ -36,7 +36,7 @@ struct Joueur {
 
 
 
-const string couleursDisponibles = "123456789";  // Utiliser une chaîne de caractères
+const string couleursDisponibles = "123456789";
 const vector<string> couleursPalette = {"\x1B[48;5;1m", "\x1B[48;5;2m", "\x1B[48;5;3m", "\x1B[48;5;4m", "\x1B[48;5;5m", "\x1B[48;5;6m", "\x1B[48;5;7m", "\x1B[48;5;8m", "\x1B[48;5;9m"};
 
 // Fonction pour afficher le plateau avec les territoires des joueurs
@@ -70,7 +70,7 @@ void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& 
             if (indiceJoueur != -1 && caractere == 'O') {
                 cout << couleursPalette[indiceJoueur] << "\x1B[38;5;232m" << setw(3) << 'O' << "\x1B[0m";
             } else {
-                // Afficher les caractères 'E' au lieu de '.'
+                // Afficher les caractères 'E' et 'P' au lieu de '.'
                 if (caractere == 'E') {
                     cout << couleursPalette[indiceJoueur] << "\x1B[38;5;232m" << setw(3) << 'E' << "\x1B[0m";
                 } else if (caractere == 'P') {
@@ -131,7 +131,7 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
         colonne + tuile.forme[0].size() <= plateau[0].size() &&
         peutPlacerTuile(joueur, tuile, ligne, colonne, plateau)) {
 
-        // Vérifier si la nouvelle tuile touche au moins un côté d'une tuile du joueur ou de la case 'E'
+        // Vérifier si la nouvelle tuile touche au moins un côté d'une tuile du joueur
         bool toucheTuileDuJoueur = false;
 
         // Pour la première tuile, autoriser le placement n'importe où
@@ -152,7 +152,7 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                             (nouvelleColonne + 1 < plateau[0].size() && plateau[nouvelleLigne][nouvelleColonne + 1].caractere == joueur.couleur)) {
                             toucheTuileDuJoueur = true;
                         }
-                        // Vérifier si la case voisine contient une case 'E' entourée de tuiles
+                        // Vérifier si la case voisine contient une case 'E' ou 'P' entourée de tuiles
                         else if (nouvelleLigne - 1 >= 0 && plateau[nouvelleLigne - 1][nouvelleColonne].caractere == 'E' &&
                                  (nouvelleLigne - 2 < 0 || plateau[nouvelleLigne - 2][nouvelleColonne].caractere != ' ') &&
                                 nouvelleLigne - 1 >= 0 && plateau[nouvelleLigne - 1][nouvelleColonne].caractere == 'P' ) {
@@ -185,7 +185,7 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                     if (plateau[ligne+i][colonne+j].caractere == 'E') {
                         bool eEstEntoure = true;  // Supposons d'abord que la pierre est entourée
 
-                        // Vérifier les cases voisines pour 'P'
+                        // Vérifier les cases voisines
                         if (ligne+i - 1 >= 0 && plateau[ligne+i - 1][colonne+j].caractere == '.') {
                             eEstEntoure = false;
                         }
@@ -202,7 +202,7 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                             eEstEntoure = false;
                         }
 
-                        // Si P n'est pas entouré dans toutes les directions, définir pEstEntoure sur false
+                        // Si 'E' n'est pas entouré dans toutes les directions, définir eEstEntoure sur false
                         if (!((ligne+i - 1 >= 0 && plateau[ligne+i - 1][colonne+j].caractere == 'O') &&
                             (colonne+j - 1 >= 0 && plateau[ligne+i][colonne+j - 1].caractere == 'O') &&
                             (ligne+i + 1 < plateau.size() && plateau[ligne+i + 1][colonne+j].caractere == 'O') &&
@@ -528,17 +528,17 @@ int main() {
                 cout << "Tuile à placer : " << endl;
                 afficherTuile(tuile, joueur.couleur);
 
-                // Demander au joueur s'il veut utiliser sa carte bonus
-                char choixBonus;
+                // Demander au joueur s'il veut utiliser son coupon
+                char choixCoupon;
                 if (joueur.couponsEchange>=1 && !joueur.premiereTuile) {
                     cout << "Voulez-vous utiliser un coupon pour échanger de tuiles ? (o/n) : ";
-                    cin >> choixBonus;
+                    cin >> choixCoupon;
                 } else {
-                    // Si le joueur a déjà utilisé sa carte bonus, réinitialiser le choixBonus à une valeur par défaut
-                    choixBonus = 'n';
+                    // Si le joueur a déjà utilisé son coupon, réinitialiser le choixCoupon à une valeur par défaut
+                    choixCoupon = 'n';
                 }
 
-                if (choixBonus == 'o' || choixBonus == 'O') {
+                if (choixCoupon == 'o' || choixCoupon == 'O') {
                     joueur.couponsEchange--;
                     // Afficher les tuiles disponibles
                     cout << "Tuiles disponibles : " << endl;
@@ -619,7 +619,7 @@ int main() {
                                 cin >> choixFinal;
                             }else {
                                 cout << joueur.nom << ", vous avez déjà utiliser tous vos coupons, pas de choix final pour vous." << endl;
-                                // Si le joueur a déjà utilisé sa carte bonus
+                                // Si le joueur a déjà utilisé son coupon
                                 choixFinal = 'n';
                             }
                             if (choixFinal == 'o' || choixFinal == 'O') {
