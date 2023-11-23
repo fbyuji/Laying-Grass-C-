@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -108,9 +109,8 @@ bool peutPlacerTuile(const Joueur& joueur, const Tuile& tuile, int ligne, int co
                     return false;
                 }
 
-                // Vérifier si la case est déjà occupée par une tuile ou appartient à un autre joueur
-                if (plateau[nouvelleLigne][nouvelleColonne].caractere != ' ' && plateau[nouvelleLigne][nouvelleColonne].caractere == 'E' &&
-                    plateau[nouvelleLigne][nouvelleColonne].caractere != joueur.couleur) {
+                // Vérifier si la case appartient à un joueur adverse
+                if (plateau[nouvelleLigne][nouvelleColonne].caractere != '.' && plateau[nouvelleLigne][nouvelleColonne].caractere != joueur.couleur) {
                     return false;
                 }
             }
@@ -118,6 +118,7 @@ bool peutPlacerTuile(const Joueur& joueur, const Tuile& tuile, int ligne, int co
     }
     return true;
 }
+
 
 
 bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau, bool premiereTuile) {

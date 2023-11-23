@@ -18,6 +18,8 @@ struct Tuile {
     vector<vector<char>> forme;
 
     Tuile(const vector<vector<char>>& forme) : forme(forme) {}
+
+    Tuile(char caractere) : forme({{caractere}}) {} //constructor tuile 1*1
 };
 
 // Structure pour représenter un joueur
@@ -25,9 +27,11 @@ struct Joueur {
     string nom;
     char couleur; // Couleur associée au joueur
     bool aUtiliseBonus; // Indique si le joueur a utilisé sa carte bonus
+    bool premiereTuile; // Indique si c'est la première tuile du joueur dans le tour
 
-    Joueur(const string& nom, char couleur) : nom(nom), couleur(couleur), aUtiliseBonus(false) {}
+    Joueur(const string& nom, char couleur) : nom(nom), couleur(couleur), aUtiliseBonus(false), premiereTuile(true) {}
 };
+
 
 const string couleursDisponibles = "123456789";  // Utiliser une chaîne de caractères
 const vector<string> couleursPalette = {"\x1B[48;5;1m", "\x1B[48;5;2m", "\x1B[48;5;3m", "\x1B[48;5;4m", "\x1B[48;5;5m", "\x1B[48;5;6m", "\x1B[48;5;7m", "\x1B[48;5;8m", "\x1B[48;5;9m"};
@@ -47,13 +51,23 @@ void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& 
 
         for (int j = 0; j < plateau[i].size(); ++j) {
             char caractere = (plateau[i][j].caractere == 0) ? '.' : plateau[i][j].caractere;
-            char couleur = plateau[i][j].caractere; // La couleur du joueur est stockée dans le caractère
-            
-            // Utiliser la palette de couleurs en fonction de l'indice du joueur
-            if (couleur >= 'A' && couleur <= 'Z') {
-                cout << couleursPalette[couleur - 'A'] << "\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
+            int indiceJoueur = -1;  // Indice du joueur associé au caractère
+
+            // Trouver le joueur associé à la couleur
+            auto joueurAssocie = find_if(joueurs.begin(), joueurs.end(),
+                                         [caractere](const Joueur& joueur) {
+                                             return joueur.couleur == caractere;
+                                         });
+
+            if (joueurAssocie != joueurs.end()) {
+                indiceJoueur = distance(joueurs.begin(), joueurAssocie);
+            }
+
+            // Afficher la tuile avec la couleur du joueur associé
+            if (indiceJoueur != -1 && caractere == 'O') {
+                cout << couleursPalette[indiceJoueur] << "\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
             } else {
-                cout << "\x1B[48;5;" << couleur << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
+                cout << "\x1B[48;5;" << caractere << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
             }
         }
         cout << endl;
@@ -65,38 +79,85 @@ void afficherTuile(const Tuile& tuile, char couleur) {
     for (const auto& ligne : tuile.forme) {
         for (char caractere : ligne) {
             if (caractere == 'O') {
-                cout << "\x1B[48;5;" << couleur - 'A' + 1 << "m\x1B[38;5;232m" << caractere << "\x1B[0m ";
+                cout << couleursPalette[couleur - '1'] << "\x1B[38;5;232m" << caractere << " " << "\x1B[0m";
             } else {
-                // Utiliser la couleur de fond par défaut pour les cases vides
-                cout << "\x1B[48;5;0m\x1B[38;5;232m. \x1B[0m";
+                cout << "\x1B[48;5;232m" << setw(2) << "." << " " << "\x1B[0m";
             }
         }
         cout << endl;
     }
 }
 
+bool peutPlacerTuile(const Joueur& joueur, const Tuile& tuile, int ligne, int colonne, const vector<vector<Case>>& plateau) {
+    for (int i = 0; i < tuile.forme.size(); ++i) {
+        for (int j = 0; j < tuile.forme[i].size(); ++j) {
+            if (tuile.forme[i][j] == 'O') {
+                int nouvelleLigne = ligne + i;
+                int nouvelleColonne = colonne + j;
 
+                // Vérifier si la case est en dehors du plateau
+                if (nouvelleLigne < 0 || nouvelleLigne >= plateau.size() || nouvelleColonne < 0 || nouvelleColonne >= plateau[0].size()) {
+                    return false;
+                }
 
-// Fonction pour placer une tuile sur le plateau du joueur
-bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau) {
-    // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
-    if (ligne + tuile.forme.size() <= plateau.size() &&
-        colonne + tuile.forme[0].size() <= plateau[0].size()) {
-        // Placer la tuile sur le plateau du joueur
-        for (int i = 0; i < tuile.forme.size(); ++i) {
-            for (int j = 0; j < tuile.forme[i].size(); ++j) {
-                plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+                // Vérifier si la case appartient à un joueur adverse
+                if (plateau[nouvelleLigne][nouvelleColonne].caractere != '.' && plateau[nouvelleLigne][nouvelleColonne].caractere != joueur.couleur) {
+                    return false;
+                }
             }
         }
+    }
+    return true;
+}
 
-        // Marquer la carte bonus comme utilisée
-        joueur.aUtiliseBonus = true;
-        return true;
+bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<vector<Case>>& plateau, bool premiereTuile) {
+    // Vérifier si la tuile peut être placée sans chevaucher d'autres tuiles
+    if (ligne + tuile.forme.size() <= plateau.size() &&
+        colonne + tuile.forme[0].size() <= plateau[0].size()&&
+        peutPlacerTuile(joueur, tuile, ligne, colonne, plateau)) {
+
+        // Vérifier si la nouvelle tuile touche au moins un côté d'une tuile du joueur
+        bool toucheTuileDuJoueur = false;
+
+        // Pour la première tuile, autoriser le placement n'importe où
+        if (!premiereTuile) {
+            for (int i = 0; i < tuile.forme.size(); ++i) {
+                for (int j = 0; j < tuile.forme[i].size(); ++j) {
+                    if (tuile.forme[i][j] == 'O') {
+                        // Vérifier si la case voisine appartient au joueur
+                        if (ligne + i - 1 >= 0 && plateau[ligne + i - 1][colonne + j].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        } else if (colonne + j - 1 >= 0 && plateau[ligne + i][colonne + j - 1].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        } else if (ligne + i + 1 < plateau.size() && plateau[ligne + i + 1][colonne + j].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        } else if (colonne + j + 1 < plateau[0].size() && plateau[ligne + i][colonne + j + 1].caractere == joueur.couleur) {
+                            toucheTuileDuJoueur = true;
+                        }
+                    }
+                }
+            }
+        } else {
+            toucheTuileDuJoueur = true; // Pour la première tuile, autoriser le placement n'importe où
+        }
+
+        // Placer la tuile sur le plateau du joueur si la condition est satisfaite
+        if (toucheTuileDuJoueur) {
+            for (int i = 0; i < tuile.forme.size(); ++i) {
+                for (int j = 0; j < tuile.forme[i].size(); ++j) {
+                    if (tuile.forme[i][j] == 'O') {
+                        plateau[ligne + i][colonne + j].caractere = joueur.couleur;
+                    }
+                }
+            }
+            return true;
+        }
     }
 
     // La tuile ne peut pas être placée
     return false;
 }
+
 
 vector<Tuile> genererTuiles() {
     vector<Tuile> tuiles;
@@ -134,25 +195,124 @@ vector<Tuile> genererTuiles() {
     // Tuile carrée avec trou 4x4
     tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}}));
 
-    // Ajoutez d'autres formes de tuiles selon votre choix
+    // Tuile en forme de flèche 3x3
+    tuiles.push_back(Tuile({{'.', 'O', '.'}, {'O', 'O', 'O'}, {'.', 'O', '.'}}));
+
+    // Tuile en forme de croix 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'.', 'O', '.'}, {'O', '.', 'O'}}));
+
+    // Tuile en forme de losange 3x3
+    tuiles.push_back(Tuile({{'.', 'O', '.'}, {'O', 'O', 'O'}, {'.', 'O', '.'}}));
+
+    // Tuile en forme de U 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'O', '.', 'O'}, {'O', 'O', 'O'}}));
+
+    // Tuile en forme de carré avec coin manquant 3x3
+    tuiles.push_back(Tuile({{'O', 'O', '.'}, {'O', '.', 'O'}, {'.', 'O', 'O'}}));
+
+    // Tuile en forme de T inversé 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', 'O'}, {'O', '.', 'O'}}));
+
+    // Tuile en forme de S inversé 3x3
+    tuiles.push_back(Tuile({{'.', 'O', '.'}, {'.', 'O', 'O'}, {'O', 'O', '.'}}));
+
+    // Tuile en forme de L inversé miroir 3x3
+    tuiles.push_back(Tuile({{'.', '.', 'O'}, {'O', '.', 'O'}, {'O', 'O', 'O'}}));
+
+    // Tuile en forme de L miroir 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', '.'}, {'O', '.', '.'}}));
 
     return tuiles;
 }
 
+// Fonction pour mélanger l'ordre des tuiles
+void melangerTuiles(vector<Tuile>& tuiles) {
+    random_shuffle(tuiles.begin(), tuiles.end());
+}
+
+// Fonction pour calculer la superficie du territoire d'un joueur
+int calculerSuperficieTerritoire(const vector<vector<Case>>& plateau, char couleur) {
+    int superficie = 0;
+    for (const auto& ligne : plateau) {
+        for (const Case& cellule : ligne) {
+            if (cellule.caractere == couleur) {
+                superficie++;
+            }
+        }
+    }
+    return superficie;
+}
+
+// Fonction pour calculer le nombre de carrés d'un joueur
+int calculerNombreCarres(const vector<vector<Case>>& plateau, char couleur) {
+    int nombreCarres = 0;
+    for (const auto& ligne : plateau) {
+        for (const Case& cellule : ligne) {
+            if (cellule.caractere == couleur) {
+                nombreCarres++;
+            }
+        }
+    }
+    return nombreCarres;
+}
+
+// Fonction pour déterminer le vainqueur
+Joueur determinerVainqueur(const vector<vector<Case>>& plateau, const vector<Joueur>& joueurs) {
+    Joueur vainqueur = joueurs[0]; // Initialiser avec le premier joueur
+    int superficieMax = calculerSuperficieTerritoire(plateau, vainqueur.couleur);
+    int nombreCarresMax = calculerNombreCarres(plateau, vainqueur.couleur);
+
+    for (size_t i = 1; i < joueurs.size(); ++i) {
+        int superficieJoueur = calculerSuperficieTerritoire(plateau, joueurs[i].couleur);
+        int nombreCarresJoueur = calculerNombreCarres(plateau, joueurs[i].couleur);
+
+        if (superficieJoueur > superficieMax || (superficieJoueur == superficieMax && nombreCarresJoueur > nombreCarresMax)) {
+            vainqueur = joueurs[i];
+            superficieMax = superficieJoueur;
+            nombreCarresMax = nombreCarresJoueur;
+        }
+    }
+
+    return vainqueur;
+}
+
+Tuile& choisirTuileAleatoire(vector<Tuile>& tuiles) {
+    int indiceAleatoire = rand() % tuiles.size();
+    return tuiles[indiceAleatoire];
+}
+
+// Fonction pour tourner une tuile de 90 degrés
+void rotationTuile(Tuile& tuile) {
+    vector<vector<char>> nouvelleForme(tuile.forme[0].size(), vector<char>(tuile.forme.size()));
+
+    for (size_t i = 0; i < tuile.forme.size(); ++i) {
+        for (size_t j = 0; j < tuile.forme[i].size(); ++j) {
+            nouvelleForme[j][tuile.forme.size() - 1 - i] = tuile.forme[i][j];
+        }
+    }
+
+    tuile.forme = nouvelleForme;
+}
+
+
 int main() {
+
+    int nombreTours = 0;
+
     // Initialiser le générateur de nombres aléatoires
     srand(time(0));
 
     // Définir les couleurs disponibles pour les joueurs
     const vector<string> couleursPalette = {"\x1B[48;5;1m", "\x1B[48;5;2m", "\x1B[48;5;3m", "\x1B[48;5;4m", "\x1B[48;5;5m", "\x1B[48;5;6m", "\x1B[48;5;7m", "\x1B[48;5;8m", "\x1B[48;5;9m"};
 
+
     // Demander le nombre de joueurs
     int nombreJoueurs;
-    cout << "Entrez le nombre de joueurs (entre 2 et " << couleursPalette.size() << ") : ";
+    cout << "Entrez le nombre de joueurs (entre 2 et " << couleursDisponibles.size() << ") : ";
     cin >> nombreJoueurs;
 
-    if (nombreJoueurs < 2 || nombreJoueurs > couleursPalette.size()) {
-        cout << "Nombre de joueurs invalide. Veuillez entrer un nombre entre 2 et " << couleursPalette.size() << "." << endl;
+    if (nombreJoueurs < 2 || nombreJoueurs > couleursDisponibles.size()) {
+        cout << "Nombre de joueurs invalide. Veuillez entrer un nombre entre 2 et " << couleursDisponibles.size() << "." << endl;
         return 1;
     }
 
@@ -163,10 +323,7 @@ int main() {
     } else if (nombreJoueurs >= 5 && nombreJoueurs <= couleursPalette.size()) {
         taillePlateau = 30;
     }
-
-    // Créer le plateau de jeu initial avec des cases vides
     vector<vector<Case>> plateau(taillePlateau, vector<Case>(taillePlateau, Case('.')));
-
 
     // Créer les joueurs avec leur prénom et la liste de tuiles
     vector<Joueur> joueurs;
@@ -182,73 +339,156 @@ int main() {
 
     // Générer les tuiles d'herbe
     vector<Tuile> tuiles = genererTuiles();
-
+    
+    // Mélanger l'ordre des tuiles
+    melangerTuiles(tuiles);
     // Boucle principale du jeu
     for (Tuile& tuile : tuiles) {
-        // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
-        for (Joueur& joueur : joueurs) {
 
-            joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
-            // Afficher l'état actuel du plateau avant le placement de la tuile
+        if (nombreTours <= 9) {
+            // À chaque tour, chaque joueur reçoit la première tuile d'herbe de la file d'attente
+            for (Joueur& joueur : joueurs) {
+
+                // Tuile 1*1 par defaut pour le premier tour
+                if (joueur.premiereTuile) {
+                    tuile = Tuile('O');
+                }else {
+                    tuile = choisirTuileAleatoire(tuiles);
+                }
+
+                // Afficher l'état actuel du plateau avant le placement de la tuile
+                afficherPlateau(plateau, joueurs);
+
+                cout << joueur.nom << ", c'est à vous de jouer." << endl;
+
+                // Afficher la tuile que le joueur doit placer
+                cout << "Tuile à placer : " << endl;
+                afficherTuile(tuile, joueur.couleur);
+
+                // Demander au joueur s'il veut utiliser sa carte bonus
+                char choixBonus;
+                if (!joueur.aUtiliseBonus && !joueur.premiereTuile) {
+                    cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
+                    cin >> choixBonus;
+                } else {
+                    // Si le joueur a déjà utilisé sa carte bonus, réinitialiser le choixBonus à une valeur par défaut
+                    choixBonus = 'n';
+                }
+
+                if (choixBonus == 'o' || choixBonus == 'O') {
+                    // Afficher les tuiles disponibles
+                    cout << "Tuiles disponibles : " << endl;
+                    for (int i = 0; i < 5; ++i) { //Limité à 5
+                        cout << i << ": " << endl;
+                        afficherTuile(tuiles[i], joueur.couleur);
+                    }
+
+                    // Demander au joueur de choisir une nouvelle tuile
+                    int choixTuile;
+                    cout << "Choisissez le numéro de la nouvelle tuile : ";
+                    cin >> choixTuile;
+
+                    // Vérifier si le choix est valide
+                    if (choixTuile >= 0 && choixTuile < 5) {
+                        // Changer la tuile du joueur
+                        tuile = tuiles[choixTuile];
+                        joueur.aUtiliseBonus = true;
+                    } else {
+                        cout << "Choix invalide. La tuile n'a pas été changée." << endl;
+                    }
+                }else {
+                    joueur.aUtiliseBonus = false;  // Réinitialiser aUtiliseBonus à false au début de chaque tour de joueur
+                }
+
+                char choixRotation;
+                do {
+                    // Afficher la tuile actuelle
+                    cout << "Tuile actuelle : " << endl;
+                    afficherTuile(tuile, joueur.couleur);
+
+                    // Demander au joueur s'il veut effectuer une rotation de la tuile
+                    cout << "Voulez-vous effectuer une rotation de la tuile ? (o/n) : ";
+                    cin >> choixRotation;
+
+                    if (choixRotation == 'o' || choixRotation == 'O') {
+                        rotationTuile(tuile);
+                        cout << "Tuile rotée avec succès." << endl;
+                    }
+                } while (choixRotation == 'o' || choixRotation == 'O');
+
+                // Demander au joueur de choisir une position pour la tuile
+                int ligne, colonne;
+                cout << "Entrez les coordonnées (ligne colonne) : ";
+                cin >> ligne >> colonne;
+
+                // Placer la tuile sur le plateau du joueur
+                if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
+                    cout << "Tuile placée avec succès." << endl;
+                    joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+                } else {
+                    cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
+                }  
+
+                nombreTours++; // Augmenter le nombre de tours après chaque tour de boucle
+            }
+        }else {
             afficherPlateau(plateau, joueurs);
+            cout << "Fin de la partie. Nombre maximum de tours atteint." << endl;
 
-            cout << joueur.nom << ", c'est à vous de jouer." << endl;
+            for (Joueur& joueur : joueurs) {
+                            char choixFinal;
+                            if (!joueur.aUtiliseBonus){
+                                cout << joueur.nom << ", c'est à vous de faire votre choix final." << endl;
+                                cout << "Voulez-vous utiliser votre carte bonus pour utiliser la tuile finale ? (o/n) : ";
+                                cin >> choixFinal;
+                            }else {
+                                cout << joueur.nom << ", vous avez déjà utiliser votre bonus, pas de choix final pour vous." << endl;
+                                // Si le joueur a déjà utilisé sa carte bonus
+                                choixFinal = 'n';
+                            }
+                            if (choixFinal == 'o' || choixFinal == 'O') {
+                                
+                                tuile = Tuile('O');
 
-            // Afficher la tuile que le joueur doit placer
-            cout << "Tuile à placer : " << endl;
-            afficherTuile(tuile, joueur.couleur);
+                                // Afficher l'état actuel du plateau avant le placement de la tuile
+                                afficherPlateau(plateau, joueurs);
 
-        // Demander au joueur s'il veut utiliser sa carte bonus
-        char choixBonus;
-        if (!joueur.aUtiliseBonus) {
-            cout << "Voulez-vous utiliser votre carte bonus pour changer de tuiles ? (o/n) : ";
-            cin >> choixBonus;
-        } else {
-            // Si le joueur a déjà utilisé sa carte bonus, réinitialiser le choixBonus à une valeur par défaut
-            choixBonus = 'n';
-        }
+                                cout << joueur.nom << ", c'est à vous de jouer." << endl;
 
-        if (choixBonus == 'o' || choixBonus == 'O') {
-            // Afficher les tuiles disponibles
-            cout << "Tuiles disponibles : " << endl;
-            for (int i = 0; i < 5; ++i) {  // Limité à 5 tuiles
-                cout << i << ": " << endl;
-                afficherTuile(tuiles[i], joueur.couleur);
+                                // Afficher la tuile que le joueur doit placer
+                                cout << "Tuile à placer : " << endl;
+                                afficherTuile(tuile, joueur.couleur);
 
+                                int ligne, colonne;
+                                cout << "Entrez les coordonnées (ligne colonne) : ";
+                                cin >> ligne >> colonne;
+
+                                // Placer la tuile sur le plateau du joueur
+                                if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
+                                    cout << "Tuile placée avec succès." << endl;
+                                    afficherPlateau(plateau, joueurs);
+                                    joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+                                } else {
+                                    cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
+                                }
+
+                            }
+                            
+                           
             }
 
-            // Demander au joueur de choisir une nouvelle tuile parmi les 5 premières
-            int choixTuile;
-            cout << "Choisissez le numéro de la nouvelle tuile (0-4) : ";
-            cin >> choixTuile;
-
-            // Vérifier si le choix est valide
-            if (choixTuile >= 0 && choixTuile < 5) {
-                // Changer la tuile du joueur
-                tuile = tuiles[choixTuile];
-                joueur.aUtiliseBonus = true;
-            } else {
-                cout << "Choix invalide. La tuile n'a pas été changée." << endl;
-            }
+            break; // Sortir de la boucle si le nombre de tours est atteint
         }
-
-
-            // Demander au joueur de choisir une position pour la tuile
-            int ligne, colonne;
-            cout << "Entrez les coordonnées (ligne colonne) : ";
-            cin >> ligne >> colonne;
-
-            // Placer la tuile sur le plateau du joueur
-            if (placerTuile(joueur, tuile, ligne, colonne, plateau)) {
-                cout << "Tuile placée avec succès." << endl;
-            } else {
-                cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
-            }
-        }
+        
     }
 
     // Afficher l'état final du plateau
     afficherPlateau(plateau, joueurs);
+
+    // À la fin du programme
+    Joueur vainqueur = determinerVainqueur(plateau, joueurs);
+    cout << "Le joueur " << vainqueur.nom << " remporte la partie !" << endl;
+
 
     return 0;
 }
