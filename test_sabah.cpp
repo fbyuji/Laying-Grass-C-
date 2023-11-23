@@ -89,7 +89,7 @@ void afficherTuile(const Tuile& tuile, char couleur) {
             if (caractere == 'O') {
                 cout << couleursPalette[couleur - '1'] << "\x1B[38;5;232m" << caractere << " " << "\x1B[0m";
             } else {
-                cout << "\x1B[48;5;232m" << setw(2) << "." << " " << "\x1B[0m";
+                cout << "\x1B[48;5;232m" << setw(2) << "." << "\x1B[0m";
             }
         }
         cout << endl;
