@@ -1,3 +1,6 @@
+User
+voici mon code :
+
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -200,7 +203,7 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                     //plateau[ligne+i][colonne+j].caractere = tuile.forme[i][j];
                     if (tuile.forme[i][j] == 'O') {
                         plateau[ligne + i][colonne + j].caractere = joueur.couleur;
-                    }else if (tuile.forme[i][j] == '.' && plateau[ligne + i][colonne + j].caractere == 'E'){
+                    }else{
                         joueur.couponsEchange--;
                     }
                 }
