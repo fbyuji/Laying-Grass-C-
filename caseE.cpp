@@ -1,6 +1,3 @@
-User
-voici mon code :
-
 #include <iostream>
 #include <vector>
 #include <iomanip>

@@ -29,9 +29,11 @@ struct Joueur {
     char couleur; // Couleur associée au joueur
     bool premiereTuile; // Indique si c'est la première tuile du joueur dans le tour
     int couponsEchange;
+    bool pierreDebloque;
 
-    Joueur(const string& nom, char couleur) : nom(nom), couleur(couleur), premiereTuile(true), couponsEchange(1) {}
+    Joueur(const string& nom, char couleur) : nom(nom), couleur(couleur), premiereTuile(true), couponsEchange(1), pierreDebloque(false) {}
 };
+
 
 
 const string couleursDisponibles = "123456789";  // Utiliser une chaîne de caractères
@@ -71,7 +73,9 @@ void afficherPlateau(const vector<vector<Case>>& plateau, const vector<Joueur>& 
                 // Afficher les caractères 'E' au lieu de '.'
                 if (caractere == 'E') {
                     cout << couleursPalette[indiceJoueur] << "\x1B[38;5;232m" << setw(3) << 'E' << "\x1B[0m";
-                } else {
+                } else if (caractere == 'P') {
+                    cout << couleursPalette[indiceJoueur] << "\x1B[38;5;232m" << setw(3) << 'P' << "\x1B[0m";
+                }else {
                     cout << "\x1B[48;5;" << caractere << "m\x1B[38;5;232m" << setw(3) << caractere << "\x1B[0m";
                 }
             }
@@ -88,7 +92,9 @@ void afficherTuile(const Tuile& tuile, char couleur) {
         for (char caractere : ligne) {
             if (caractere == 'O') {
                 cout << couleursPalette[couleur - '1'] << "\x1B[38;5;232m" << caractere << " " << "\x1B[0m";
-            } else {
+            } else if (caractere == 'X'){
+                cout << couleursPalette[couleur - '1'] << "\x1B[38;5;232m" << caractere << " " << "\x1B[0m";
+            }else {
                 cout << "\x1B[48;5;232m" << setw(2) << "." << "\x1B[0m";
             }
         }
@@ -146,16 +152,20 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                         }
                         // Vérifier si la case voisine contient une case 'E' entourée de tuiles
                         else if (nouvelleLigne - 1 >= 0 && plateau[nouvelleLigne - 1][nouvelleColonne].caractere == 'E' &&
-                                 (nouvelleLigne - 2 < 0 || plateau[nouvelleLigne - 2][nouvelleColonne].caractere != ' ')) {
+                                 (nouvelleLigne - 2 < 0 || plateau[nouvelleLigne - 2][nouvelleColonne].caractere != ' ') &&
+                                nouvelleLigne - 1 >= 0 && plateau[nouvelleLigne - 1][nouvelleColonne].caractere == 'P' ) {
                             toucheTuileDuJoueur = true;
                         } else if (nouvelleColonne - 1 >= 0 && plateau[nouvelleLigne][nouvelleColonne - 1].caractere == 'E' &&
-                                 (nouvelleColonne - 2 < 0 || plateau[nouvelleLigne][nouvelleColonne - 2].caractere != ' ')) {
+                                 (nouvelleColonne - 2 < 0 || plateau[nouvelleLigne][nouvelleColonne - 2].caractere != ' ')&&
+                                 nouvelleColonne - 1 >= 0 && plateau[nouvelleLigne][nouvelleColonne - 1].caractere == 'P') {
                             toucheTuileDuJoueur = true;
                         } else if (nouvelleLigne + 1 < plateau.size() && plateau[nouvelleLigne + 1][nouvelleColonne].caractere == 'E' &&
-                                 (nouvelleLigne + 2 >= plateau.size() || plateau[nouvelleLigne + 2][nouvelleColonne].caractere != ' ')) {
+                                 (nouvelleLigne + 2 >= plateau.size() || plateau[nouvelleLigne + 2][nouvelleColonne].caractere != ' ') &&
+                                 nouvelleLigne + 1 < plateau.size() && plateau[nouvelleLigne + 1][nouvelleColonne].caractere == 'P') {
                             toucheTuileDuJoueur = true;
                         } else if (nouvelleColonne + 1 < plateau[0].size() && plateau[nouvelleLigne][nouvelleColonne + 1].caractere == 'E' &&
-                                 (nouvelleColonne + 2 >= plateau[0].size() || plateau[nouvelleLigne][nouvelleColonne + 2].caractere != ' ')) {
+                                 (nouvelleColonne + 2 >= plateau[0].size() || plateau[nouvelleLigne][nouvelleColonne + 2].caractere != ' ') &&
+                                 nouvelleColonne + 1 < plateau[0].size() && plateau[nouvelleLigne][nouvelleColonne + 1].caractere == 'P') {
                             toucheTuileDuJoueur = true;
                         }
                     }
@@ -171,37 +181,73 @@ bool placerTuile(Joueur& joueur, Tuile& tuile, int ligne, int colonne, vector<ve
                 for (int j = 0; j < tuile.forme[i].size(); ++j) {
                     // Si la case contient un 'E', augmenter le nombre de "couponsEchange" du joueur
                     if (plateau[ligne+i][colonne+j].caractere == 'E') {
-                        bool estEntouree = false;
+                        bool eEstEntoure = false;
 
                         if (ligne+i - 1 >= 0 && plateau[ligne+i - 1][colonne+j].caractere != ' ' && plateau[ligne+i - 1][colonne+j].caractere != 'E') {
-                            estEntouree = true;
+                            eEstEntoure = true;
                         }
 
                         if (colonne+j - 1 >= 0 && plateau[ligne+i][colonne+j - 1].caractere != ' ' && plateau[ligne+i][colonne+j - 1].caractere != 'E') {
-                            estEntouree = true;
+                            eEstEntoure = true;
                         }
 
                         if (ligne+i + 1 < plateau.size() && plateau[ligne+i + 1][colonne+j].caractere != ' ' && plateau[ligne+i + 1][colonne+j].caractere != 'E') {
-                            estEntouree = true;
+                            eEstEntoure = true;
                         }
 
                         if (colonne+j + 1 < plateau[0].size() && plateau[ligne+i][colonne+j + 1].caractere != ' ' && plateau[ligne+i][colonne+j + 1].caractere != 'E') {
-                            estEntouree = true;
+                            eEstEntoure = true;
                         }
 
                         // Incrémenter le nombre de coupons uniquement si la case 'E' est entourée
-                        if (estEntouree) {
+                        if (eEstEntoure) {
                             joueur.couponsEchange++;
                             cout << "Vous avez " << joueur.couponsEchange << " coupon(s)" << endl;
                         }
                     }
+                    if (plateau[ligne+i][colonne+j].caractere == 'P') {
+                        bool pEstEntoure = true;  // Supposons d'abord que la pierre est entourée
+
+                        // Vérifier les cases voisines pour 'P'
+                        if (ligne+i - 1 >= 0 && plateau[ligne+i - 1][colonne+j].caractere == '.') {
+                            pEstEntoure = false;
+                        }
+
+                        if (colonne+j - 1 >= 0 && plateau[ligne+i][colonne+j - 1].caractere == '.') {
+                            pEstEntoure = false;
+                        }
+
+                        if (ligne+i + 1 < plateau.size() && plateau[ligne+i + 1][colonne+j].caractere == '.') {
+                            pEstEntoure = false;
+                        }
+
+                        if (colonne+j + 1 < plateau[0].size() && plateau[ligne+i][colonne+j + 1].caractere == '.') {
+                            pEstEntoure = false;
+                        }
+
+                        // Si P n'est pas entouré dans toutes les directions, définir pEstEntoure sur false
+                        if (!(ligne+i - 1 >= 0 && plateau[ligne+i - 1][colonne+j].caractere != '.' &&
+                            colonne+j - 1 >= 0 && plateau[ligne+i][colonne+j - 1].caractere != '.' &&
+                            ligne+i + 1 < plateau.size() && plateau[ligne+i + 1][colonne+j].caractere != '.' &&
+                            colonne+j + 1 < plateau[0].size() && plateau[ligne+i][colonne+j + 1].caractere != '.')) {
+                            pEstEntoure = false;
+                        }
+
+
+                        // Si P est entouré placer une pierre
+                        if (pEstEntoure) {
+                            joueur.pierreDebloque = true;
+                            cout << "Vous avez débloqué une pierre placez la !"<< endl;
+                        }
+                    }
 
                     // Placer la tuile sur la case du plateau
-                    //plateau[ligne+i][colonne+j].caractere = tuile.forme[i][j];
                     if (tuile.forme[i][j] == 'O') {
                         plateau[ligne + i][colonne + j].caractere = joueur.couleur;
                     }else if (tuile.forme[i][j] == '.' && plateau[ligne + i][colonne + j].caractere == 'E'){
                         joueur.couponsEchange--;
+                    }else if (tuile.forme[i][j] == 'X'){
+                        plateau[ligne + i][colonne + j].caractere = 'X';
                     }
                 }
             }
@@ -393,8 +439,18 @@ int main() {
             do {
                 ligne = rand() % (taillePlateau - 2) + 1;  // Éviter les bords
                 colonne = rand() % (taillePlateau - 2) + 1;  // Éviter les bords
-            } while (plateau[ligne][colonne].caractere == 'E');  // Réessayer si la case est déjà un 'E'
+            } while (plateau[ligne][colonne].caractere == 'E' || plateau[ligne][colonne].caractere == 'P');  // Réessayer si la case est déjà un 'E' ou 'P'
             plateau[ligne][colonne].caractere = 'E';
+        }
+
+        // Ajouter deux cases 'P' supplémentaires
+        for (int i = 0; i < 2; ++i) {
+            int ligne, colonne;
+            do {
+                ligne = rand() % (taillePlateau - 2) + 1;  // Éviter les bords
+                colonne = rand() % (taillePlateau - 2) + 1;  // Éviter les bords
+            } while (plateau[ligne][colonne].caractere == 'E' || plateau[ligne][colonne].caractere == 'P');  // Réessayer si la case est déjà un 'E' ou 'P'
+            plateau[ligne][colonne].caractere = 'P';
         }
     } else if (taillePlateau == 30) {
         for (int i = 0; i < 14; ++i) {
@@ -404,6 +460,16 @@ int main() {
                 colonne = rand() % (taillePlateau - 2) + 1;  // Éviter les bords
             } while (plateau[ligne][colonne].caractere == 'E');  // Réessayer si la case est déjà un 'E'
             plateau[ligne][colonne].caractere = 'E';
+        }
+
+        // Ajouter cinq cases 'P' supplémentaires
+        for (int i = 0; i < 5; ++i) {
+            int ligne, colonne;
+            do {
+                ligne = rand() % (taillePlateau - 2) + 1;  // Éviter les bords
+                colonne = rand() % (taillePlateau - 2) + 1;  // Éviter les bords
+            } while (plateau[ligne][colonne].caractere == 'E' || plateau[ligne][colonne].caractere == 'P');  // Réessayer si la case est déjà un 'E' ou 'P'
+            plateau[ligne][colonne].caractere = 'P';
         }
     }
     // Créer les joueurs avec leur prénom et la liste de tuiles
@@ -506,6 +572,21 @@ int main() {
                 if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
                     cout << "Tuile placée avec succès." << endl;
                     joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+                    if (joueur.pierreDebloque) {
+                        tuile = Tuile('X');
+                        cout << "Tuile à placer : " << endl;
+                        afficherTuile(tuile, joueur.couleur);
+                        int ligne, colonne;
+                        cout << "Entrez les coordonnées (ligne colonne) : ";
+                        cin >> ligne >> colonne;
+
+                        // Placer la pierre sur le plateau du joueur
+                        if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
+                            cout << "Pierre placée avec succès." << endl;
+                        } else {
+                            cout << "Impossible de placer la tuile. Vous perdez votre pierre." << endl;
+                        }
+                    }
                 } else {
                     cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
                 }  
@@ -549,6 +630,21 @@ int main() {
                                     cout << "Tuile placée avec succès." << endl;
                                     afficherPlateau(plateau, joueurs);
                                     joueur.premiereTuile = false;  // Réinitialiser premiereTuile après la première tuile du joueur
+                                    if (joueur.pierreDebloque) {
+                                        tuile = Tuile('X');
+                                        cout << "Tuile à placer : " << endl;
+                                        afficherTuile(tuile, joueur.couleur);
+                                        int ligne, colonne;
+                                        cout << "Entrez les coordonnées (ligne colonne) : ";
+                                        cin >> ligne >> colonne;
+
+                                        // Placer la pierre sur le plateau du joueur
+                                        if (placerTuile(joueur, tuile, ligne, colonne, plateau, joueur.premiereTuile)) {
+                                            cout << "Pierre placée avec succès." << endl;
+                                        } else {
+                                            cout << "Impossible de placer la tuile. Vous perdez votre pierre." << endl;
+                                        }
+                                    }
                                 } else {
                                     cout << "Impossible de placer la tuile. Le joueur passe son tour." << endl;
                                 }
