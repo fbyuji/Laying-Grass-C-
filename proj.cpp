@@ -343,6 +343,153 @@ vector<Tuile> genererTuiles() {
     // Tuile en forme de L miroir 3x3
     tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', '.'}, {'O', '.', '.'}}));
 
+    // Tuile en forme de C 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', '.'}, {'O', '.', 'O'}}));
+ 
+    // Tuile en forme de Z inversé 3x3
+    tuiles.push_back(Tuile({{'O', 'O', '.'}, {'.', 'O', '.'}, {'.', 'O', 'O'}}));
+ 
+    // Tuile en forme de V 3x3
+    tuiles.push_back(Tuile({{'O', '.', '.'}, {'O', '.', '.'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de X 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'.', 'O', '.'}, {'O', '.', 'O'}}));
+ 
+    // Tuile en forme de serpent 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'.', 'O', 'O', 'O'}, {'O', 'O', 'O', '.'}, {'.', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de T inversé miroir 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', 'O'}, {'O', '.', '.'}}));
+ 
+    // Tuile en forme de Y 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'.', 'O', '.'}, {'.', 'O', 'O'}}));
+ 
+    // Tuile en forme de U inversé 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'O', '.', 'O'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de L double 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', '.'}, {'O', '.', '.', '.'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de carré avec diagonales 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', 'O'}, {'.', 'O', 'O', '.'}, {'.', 'O', 'O', '.'}, {'O', '.', '.', 'O'}}));
+ 
+    // Tuile en forme de U inversé miroir 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'.', '.', 'O'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de Z double 4x4
+    tuiles.push_back(Tuile({{'O', 'O', '.', '.'}, {'.', 'O', 'O', '.'}, {'.', '.', 'O', 'O'}, {'.', '.', '.', 'O'}}));
+ 
+    // Tuile en forme de L avec coin manquant 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', '.'}, {'O', 'O', '.'}}));
+ 
+    // Tuile en forme de F 3x3
+    tuiles.push_back(Tuile({{'O', '.', '.'}, {'O', '.', '.'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de Z avec coin manquant 3x3
+    tuiles.push_back(Tuile({{'O', 'O', '.'}, {'.', 'O', '.'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de L avec diagonale 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', '.'}, {'O', '.', '.', '.'}, {'O', '.', '.', '.'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de S avec coin manquant 3x3
+    tuiles.push_back(Tuile({{'.', 'O', 'O'}, {'O', 'O', '.'}, {'O', '.', '.'}}));
+ 
+    // Tuile en forme de V inversé 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'.', '.', 'O'}, {'.', '.', 'O'}}));
+ 
+    // Tuile en forme de X inversé 3x3
+    tuiles.push_back(Tuile({{'.', 'O', '.'}, {'O', '.', 'O'}, {'.', 'O', '.'}}));
+ 
+    // Tuile en forme de S avec diagonale 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'.', 'O', 'O', '.'}, {'.', '.', '.', '.'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de Z avec diagonale 4x4
+    tuiles.push_back(Tuile({{'O', 'O', '.', 'O'}, {'.', 'O', 'O', '.'}, {'.', '.', 'O', 'O'}, {'.', 'O', '.', 'O'}}));
+ 
+    // Tuile en forme de L double inversé 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}, {'.', '.', '.', '.'}}));
+ 
+    // Tuile en forme de C inversé 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'O', '.', 'O'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de S double 4x4
+    tuiles.push_back(Tuile({{'O', '.', 'O', '.'}, {'.', 'O', 'O', 'O'}, {'.', 'O', 'O', '.'}, {'O', '.', 'O', '.'}}));
+ 
+    // Tuile en forme de L avec diagonale inversée 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', '.'}, {'.', '.', '.', '.'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de M 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}, {'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}}));
+ 
+    // Tuile en forme de N 3x3
+    tuiles.push_back(Tuile({{'O', '.', '.'}, {'O', 'O', '.'}, {'O', '.', 'O'}}));
+ 
+    // Tuile en forme de Y inversé 4x4
+    tuiles.push_back(Tuile({{'O', '.', 'O', '.'}, {'.', 'O', 'O', '.'}, {'.', '.', 'O', '.'}, {'.', '.', 'O', '.'}}));
+ 
+    // Tuile en forme de Z avec diagonale inversée 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', '.'}, {'.', 'O', '.', '.'}, {'.', '.', 'O', '.'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de E 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', '.'}, {'O', 'O', 'O', 'O'}, {'O', '.', '.', '.'}}));
+ 
+    // Tuile en forme de K 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'O', 'O', 'O'}, {'O', '.', 'O'}}));
+ 
+    // Tuile en forme de X 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', 'O'}, {'.', 'O', 'O', '.'}, {'.', 'O', 'O', '.'}, {'O', '.', '.', 'O'}}));
+ 
+    // Tuile en forme de C 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', '.'}, {'O', '.', '.', '.'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de T inversé double 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'.', 'O', '.', '.'}, {'.', 'O', '.', '.'}, {'.', 'O', '.', '.'}}));
+ 
+    // Tuile en forme de H 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}, {'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}}));
+ 
+    // Tuile en forme de Z double 4x4
+    tuiles.push_back(Tuile({{'O', 'O', '.', 'O'}, {'.', 'O', 'O', '.'}, {'.', 'O', 'O', '.'}, {'O', '.', '.', 'O'}}));
+ 
+    // Tuile en forme de L inversé double 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', 'O'}, {'O', '.', '.', 'O'}, {'O', 'O', 'O', 'O'}, {'.', '.', '.', '.'}}));
+ 
+    // Tuile en forme de V 3x3
+    tuiles.push_back(Tuile({{'O', '.', '.'}, {'O', '.', '.'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de W 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', '.'}, {'O', 'O', 'O', 'O'}, {'.', '.', 'O', '.'}, {'.', '.', 'O', '.'}}));
+ 
+    // Tuile en forme de J 3x3
+    tuiles.push_back(Tuile({{'O', '.', '.'}, {'O', '.', '.'}, {'O', 'O', '.'}}));
+ 
+    // Tuile en forme de F 3x3
+    tuiles.push_back(Tuile({{'O', '.', '.'}, {'O', 'O', '.'}, {'O', '.', 'O'}}));
+ 
+    // Tuile en forme de G 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'O', '.', '.', '.'}, {'O', '.', 'O', 'O'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de P 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'O', '.', 'O'}, {'O', '.', 'O'}}));
+ 
+    // Tuile en forme de I 3x3
+    tuiles.push_back(Tuile({{'O', 'O', 'O'}, {'.', 'O', '.'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de X inversé 4x4
+    tuiles.push_back(Tuile({{'O', '.', '.', 'O'}, {'.', 'O', 'O', '.'}, {'O', 'O', 'O', 'O'}, {'.', 'O', 'O', '.'}}));
+ 
+    // Tuile en forme de Z avec diagonale 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'.', '.', 'O', '.'}, {'.', 'O', '.', 'O'}, {'O', 'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de U inversé 3x3
+    tuiles.push_back(Tuile({{'O', '.', 'O'}, {'O', '.', 'O'}, {'O', 'O', 'O'}}));
+ 
+    // Tuile en forme de T double 4x4
+    tuiles.push_back(Tuile({{'O', 'O', 'O', 'O'}, {'.', 'O', '.', '.'}, {'.', 'O', '.', '.'}, {'.', 'O', '.', '.'}}));
+ 
+    // Tuile en forme de S double 4x4
+    tuiles.push_back(Tuile({{'.', 'O', 'O', '.'}, {'O', 'O', 'O', 'O'}, {'.', '.', 'O', '.'}, {'.', 'O', 'O', '.'}}));
+
     return tuiles;
 }
 
